@@ -27,7 +27,11 @@ namespace AnimationPlugin
             std::vector<std::string> boneNames;
         };
 
+<<<<<<< HEAD:src/Plugins/Animation/AnimationLoader.hpp
+//        ANIM_PLUGIN_API AnimationData loadFile(const std::string& name , const FancyMeshPlugin::MeshLoadingInfo &info);
+=======
         ANIM_PLUGIN_API AnimationData loadFile(const std::string& name );
+>>>>>>> dummyplugin:Plugins/Animation/src/AnimationLoader.hpp
     }
 }
 

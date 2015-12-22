@@ -38,7 +38,12 @@ namespace AnimationPlugin
         void getTransformFromKey(const aiNodeAnim* key, int i, Ra::Core::Transform& keyTransform);
         void checkWeights( AnimationData& data );
 
+<<<<<<< HEAD:src/Plugins/Animation/AnimationLoader.cpp
+        /*
+        AnimationData loadFile( const std::string& name, const FancyMeshPlugin::MeshLoadingInfo& info)
+=======
         AnimationData loadFile( const std::string& name )
+>>>>>>> dummyplugin:Plugins/Animation/src/AnimationLoader.cpp
         {
             Assimp::Importer importer;
             const aiScene* scene = importer.ReadFile( name,
@@ -217,6 +222,7 @@ namespace AnimationPlugin
             animData.hasLoaded = true;
             return animData;
         }
+        */
 
         void recursiveSkeletonRead(const aiNode* node, aiMatrix4x4 accTransform, BoneMap &boneMap, AnimationData& data, int parent)
         {
@@ -229,7 +235,13 @@ namespace AnimationPlugin
 
             if (isBoneNode)
             {
+<<<<<<< HEAD:src/Plugins/Animation/AnimationLoader.cpp
+                LOG( logDEBUG ) << "Skeleton node found.";
+                LOG( logDEBUG ) << "Bone name: " << node->mName.C_Str();
+                if(parent == -1)
+=======
                 if (parent == -1)
+>>>>>>> dummyplugin:Plugins/Animation/src/AnimationLoader.cpp
                 {
                     assimpToCore(accTransform, data.baseTransform);
                 }
@@ -248,7 +260,13 @@ namespace AnimationPlugin
                 currentTransform = aiMatrix4x4();
             }
 
+<<<<<<< HEAD:src/Plugins/Animation/AnimationLoader.cpp
+            for(uint i = 0; i < node->mNumChildren; ++i)
+            LOG( logDEBUG ) << "Child :" << node->mChildren[i]->mName.C_Str();
+            for(uint i = 0; i < node->mNumChildren; ++i)
+=======
             for (uint i = 0; i < node->mNumChildren; ++i)
+>>>>>>> dummyplugin:Plugins/Animation/src/AnimationLoader.cpp
                 recursiveSkeletonRead(node->mChildren[i], currentTransform, boneMap, data, currentIndex);
         }
 

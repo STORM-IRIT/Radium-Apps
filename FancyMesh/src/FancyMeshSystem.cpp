@@ -3,13 +3,15 @@
 #include <Core/String/StringUtils.hpp>
 #include <Core/Tasks/Task.hpp>
 #include <Core/Tasks/TaskQueue.hpp>
+
 #include <Engine/RadiumEngine.hpp>
 #include <Engine/Entity/Entity.hpp>
 #include <Engine/Entity/FrameInfo.hpp>
 #include <Engine/Renderer/RenderTechnique/RenderTechnique.hpp>
+#include <Engine/Assets/FileData.hpp>
+#include <Engine/Assets/GeometryData.hpp>
 
 #include "FancyMeshComponent.hpp"
-#include "FancyMeshLoader.hpp"
 
 namespace FancyMeshPlugin
 {
@@ -32,71 +34,16 @@ namespace FancyMeshPlugin
     {
     }
 
-    void FancyMeshSystem::handleFileLoading(Ra::Engine::Entity* entity, const std::string& filename)
+    void FancyMeshSystem::handleAssetLoading( Ra::Engine::Entity* entity, const Ra::Asset::FileData* fileData )
     {
-        LOG( logDEBUG ) << "FancyMeshSystem : loading the file " << filename << "...";
-
-        DataVector componentsData = FancyMeshLoader::loadFile( filename );
-
-        if ( componentsData.empty() )
-        {
-            // Something wrong happened while trying to load the file
-            return;
-        }
-        
-        for (uint i = 0; i < componentsData.size(); i++)
-        {
-            FancyComponentData componentData = componentsData[i];
-            FancyMeshComponent* component = static_cast<FancyMeshComponent*>(addComponentToEntity(entity));
-            component->handleMeshLoading(componentData);
-            
-            MeshLoadingInfo loadingInfo;
-            loadingInfo.filename = filename;
-            loadingInfo.index = i;
-            loadingInfo.vertexMap = componentData.mesh.vertexMap;
-            component->setLoadingInfo(loadingInfo);
-            
-            callOnComponentCreationDependencies(component);   
-        }
-    }
-
-    void FancyMeshSystem::handleDataLoading( Ra::Engine::Entity* entity, const std::string& rootFolder,
-                                             const std::map<std::string, Ra::Core::Any>& data )
-    {
-        LOG( logDEBUG ) << "FancyMeshSystem : loading " << data.size() << " data items...";
-
-        // Find mesh
-        std::string filename;
-        auto meshData = data.find( "mesh" );
-        if ( meshData != data.end() )
-        {
-            filename = rootFolder + "/" + meshData->second.as<std::string>();
-        }
-
-        DataVector componentsData = FancyMeshLoader::loadFile( filename );
-
-        if ( componentsData.empty() )
-        {
-            // Something wrong happened while trying to load the file
-            return;
-        }
-
-        if ( componentsData.size() > 1 )
-        {
-            LOG( logWARNING ) << "Too much objects have been loaded, some data will be ignored.";
-        }
-
-        FancyComponentData componentData = componentsData[0];
-
-        FancyMeshComponent* component = static_cast<FancyMeshComponent*>( addComponentToEntity( entity ) );
-        component->handleMeshLoading( componentData );
-        
-        callOnComponentCreationDependencies(component);
+        // FIXME(Charly): One component of a given type by entity ?
+        FancyMeshComponent* component = static_cast<FancyMeshComponent*>(addComponentToEntity(entity));
+        component->handleMeshLoading( fileData );
     }
 
     Ra::Engine::Component* FancyMeshSystem::addComponentToEntityInternal( Ra::Engine::Entity* entity, uint id )
     {
-        std::string componentName = "FancyMeshComponent_" + entity->getName() + std::to_string( id );
+        std::string componentName = "FMC_" + entity->getName() + std::to_string( id );
         FancyMeshComponent* component = new FancyMeshComponent( componentName );
 
         return component;

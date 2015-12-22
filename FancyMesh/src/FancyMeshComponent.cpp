@@ -2,12 +2,16 @@
 
 #include <Core/String/StringUtils.hpp>
 #include <Core/Mesh/MeshUtils.hpp>
+
 #include <Engine/Renderer/RenderObject/RenderObjectManager.hpp>
 #include <Engine/Renderer/Mesh/Mesh.hpp>
 #include <Engine/Renderer/RenderTechnique/RenderTechnique.hpp>
 #include <Engine/Renderer/RenderTechnique/ShaderConfiguration.hpp>
 #include <Engine/Renderer/RenderTechnique/ShaderProgramManager.hpp>
 #include <Engine/Renderer/RenderObject/Primitives/DrawPrimitives.hpp>
+
+#include <Engine/Assets/FileData.hpp>
+#include <Engine/Assets/GeometryData.hpp>
 
 namespace FancyMeshPlugin
 {
@@ -66,73 +70,114 @@ namespace FancyMeshPlugin
         addRenderObject( renderObject );
     }
 
-
-    void FancyMeshComponent::handleMeshLoading( const FancyComponentData& data )
+    void FancyMeshComponent::handleMeshLoading( const Ra::Asset::FileData* fileData )
     {
-
-        Ra::Engine::RenderObject* renderObject = new Ra::Engine::RenderObject( data.name, this );
-        renderObject->setVisible( true );
-
-        FancyMeshData meshData = data.mesh;
-
-        std::stringstream ss;
-        ss << data.name << "_mesh_";
-        std::string meshName = ss.str();
-
-        std::shared_ptr<Ra::Engine::Mesh> mesh( new Ra::Engine::Mesh( meshName ) );
-        
-        mesh->loadGeometry( meshData.positions, meshData.indices );
-
-        mesh->addData( Ra::Engine::Mesh::VERTEX_NORMAL, meshData.normals );
-        mesh->addData( Ra::Engine::Mesh::VERTEX_TANGENT, meshData.tangents );
-        mesh->addData( Ra::Engine::Mesh::VERTEX_BITANGENT, meshData.bitangents );
-        mesh->addData( Ra::Engine::Mesh::VERTEX_TEXCOORD, meshData.texcoords );
-        mesh->addData( Ra::Engine::Mesh::VERTEX_COLOR, meshData.colors );
-        mesh->addData( Ra::Engine::Mesh::VERTEX_WEIGHTS, meshData.weights );
-
-        renderObject->setMesh( mesh );
-
-        m_meshIndex = addRenderObject(renderObject);
-
-        // Build m_mesh
-        int triangleCount = meshData.indices.size() / 3;
-        int vertexCount = meshData.positions.size();
-        m_mesh.m_vertices.resize(vertexCount);
-        m_mesh.m_normals.resize(vertexCount);
-        m_mesh.m_triangles.resize(triangleCount);
-
-        for (int i = 0; i < vertexCount; i++)
+        uint roCpt = 0;
+        for ( const auto& data : fileData->getGeometryData() )
         {
-            Ra::Core::Vector4 pos = meshData.positions[i];
-            Ra::Core::Vector4 normals = meshData.normals[i];
-            m_mesh.m_vertices[i] = Ra::Core::Vector3(pos(0), pos(1), pos(2));
-            m_mesh.m_normals[i] = Ra::Core::Vector3(normals(0), normals(1), normals(2));
+            std::string name( m_name );
+            name.append( "_" + data->getName() + std::to_string( roCpt++ ) );
+
+            std::string roName = name;
+            roName.append( "_RO" );
+
+            std::string meshName = name;
+            meshName.append( "_Mesh" );
+
+            std::string matName = name;
+            matName.append( "_Mat" );
+
+            Ra::Engine::RenderObject* renderObject = new Ra::Engine::RenderObject( roName, this );
+            renderObject->setVisible( true );
+
+            std::shared_ptr<Ra::Engine::Mesh> mesh( new Ra::Engine::Mesh( meshName ) );
+
+            // FIXME(Charly): Find a cleaner way to build geometry
+            std::vector<uint> indices;
+            for ( const auto& face : data->getFaces() )
+            {
+                indices.push_back( face[0] );
+                indices.push_back( face[1] );
+                indices.push_back( face[2] );
+            }
+
+            Ra::Core::Vector3Array positions;
+            Ra::Core::Vector3Array normals;
+            Ra::Core::Vector4Array tangents;
+            Ra::Core::Vector4Array bitangents;
+            Ra::Core::Vector4Array texcoords;
+            Ra::Core::Vector4Array colors;
+
+            for ( const auto& v : data->getVertices() )     positions.push_back( v );
+            for ( const auto& v : data->getNormals() )      normals.push_back( v );
+            for ( const auto& v : data->getTangents() )     tangents.push_back( v );
+            for ( const auto& v : data->getBiTangents() )   bitangents.push_back( v );
+            for ( const auto& v : data->getTexCoords() )    texcoords.push_back( v );
+            for ( const auto& v : data->getColors() )       colors.push_back( v );
+
+            mesh->loadGeometry( positions, indices );
+
+            mesh->addData( Ra::Engine::Mesh::VERTEX_NORMAL, normals );
+            mesh->addData( Ra::Engine::Mesh::VERTEX_TANGENT, tangents );
+            mesh->addData( Ra::Engine::Mesh::VERTEX_BITANGENT, bitangents );
+            mesh->addData( Ra::Engine::Mesh::VERTEX_TEXCOORD, texcoords );
+            mesh->addData( Ra::Engine::Mesh::VERTEX_COLOR, colors );
+            // FIXME(Charly): Should not weights be part of the geometry ?
+            //        mesh->addData( Ra::Engine::Mesh::VERTEX_WEIGHTS, meshData.weights );
+
+            renderObject->setMesh( mesh );
+
+            m_meshIndex = addRenderObject(renderObject);
+
+            // FIXME(Charly)
+            // Build m_mesh
+            //        int triangleCount = meshData.indices.size() / 3;
+            //        int vertexCount = meshData.positions.size();
+            //        m_mesh.m_vertices.resize(vertexCount);
+            //        m_mesh.m_normals.resize(vertexCount);
+            //        m_mesh.m_triangles.resize(triangleCount);
+
+            //        for (int i = 0; i < vertexCount; i++)
+            //        {
+            //            Ra::Core::Vector4 pos = meshData.positions[i];
+            //            Ra::Core::Vector4 normals = meshData.normals[i];
+            //            m_mesh.m_vertices[i] = Ra::Core::Vector3(pos(0), pos(1), pos(2));
+            //            m_mesh.m_normals[i] = Ra::Core::Vector3(normals(0), normals(1), normals(2));
+            //        }
+
+            //        for (int i = 0; i < triangleCount; i++)
+            //            m_mesh.m_triangles[i] = Ra::Core::Triangle(meshData.indices[i * 3], meshData.indices[i * 3 + 1], meshData.indices[i * 3 + 2]);
+
+            Ra::Engine::RenderTechnique* rt = new Ra::Engine::RenderTechnique;
+            Ra::Engine::Material* mat = new Ra::Engine::Material( matName );
+            auto m = data->getMaterial();
+            if ( m.hasDiffuse() )   mat->setKd( m.m_diffuse );
+            if ( m.hasSpecular() )  mat->setKs( m.m_specular );
+            if ( m.hasShininess() ) mat->setNs( m.m_shininess );
+            if ( m.hasDiffuseTexture() ) mat->addTexture( Ra::Engine::Material::TextureType::TEX_DIFFUSE, m.m_texDiffuse );
+            if ( m.hasSpecularTexture() ) mat->addTexture( Ra::Engine::Material::TextureType::TEX_SPECULAR, m.m_texSpecular );
+            if ( m.hasShininessTexture() ) mat->addTexture( Ra::Engine::Material::TextureType::TEX_SHININESS, m.m_texShininess );
+            if ( m.hasOpacityTexture() ) mat->addTexture( Ra::Engine::Material::TextureType::TEX_ALPHA, m.m_texOpacity );
+            if ( m.hasNormalTexture() ) mat->addTexture( Ra::Engine::Material::TextureType::TEX_NORMAL, m.m_texNormal );
+
+            rt->material = mat;
+            rt->shaderConfig = Ra::Engine::ShaderConfiguration( "BlinnPhong", "../Shaders" );
+
+            renderObject->setRenderTechnique( rt );
         }
 
-        for (int i = 0; i < triangleCount; i++)
-            m_mesh.m_triangles[i] = Ra::Core::Triangle(meshData.indices[i * 3], meshData.indices[i * 3 + 1], meshData.indices[i * 3 + 2]);
-
-        renderObject->setRenderTechnique( data.renderTechnique );
+//        for (int i = 0; i < triangleCount; i++)
+//            m_mesh.m_triangles[i] = Ra::Core::Triangle(meshData.indices[i * 3], meshData.indices[i * 3 + 1], meshData.indices[i * 3 + 2]);
 
         // Create aabb and display it
-        Ra::Core::Vector3 bmin = data.mesh.positions.getMap().rowwise().minCoeff().head<3>();
-        Ra::Core::Vector3 bmax = data.mesh.positions.getMap().rowwise().maxCoeff().head<3>();
+//        Ra::Core::Vector3 bmin = data.mesh.positions.getMap().rowwise().minCoeff().head<3>();
+//        Ra::Core::Vector3 bmax = data.mesh.positions.getMap().rowwise().maxCoeff().head<3>();
 
-        Ra::Core::Aabb aabb( bmin, bmax );
+//        Ra::Core::Aabb aabb( bmin, bmax );
 
-        m_aabbIndex = addRenderObject(
-                    Ra::Engine::DrawPrimitives::AABB(
-                        this, aabb, Ra::Core::Color( 1, 1, 0, 1 ) ) );
-    }
-    
-    void FancyMeshComponent::setLoadingInfo(MeshLoadingInfo info)
-    {
-        m_loadingInfo = info;
-    }
-    
-    const MeshLoadingInfo& FancyMeshComponent::getLoadingInfo() const
-    {
-        return m_loadingInfo;
+//        m_aabbIndex = addRenderObject(
+//                    Ra::Engine::DrawPrimitives::AABB(
+//                        this, aabb, Ra::Core::Color( 1, 1, 0, 1 ) ) );
     }
     
     Ra::Core::Index FancyMeshComponent::getMeshIndex() const

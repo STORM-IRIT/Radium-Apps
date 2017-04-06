@@ -1,4 +1,4 @@
-set(app_target test0)
+set(app_target OpenGLExperiment)
 
 # Qt stuff //////////////////////
 
@@ -18,11 +18,15 @@ set(CMAKE_AUTORCC ON)
 
 # ///////////////////////////////
 
+find_package(GLBinding REQUIRED)
+find_package(GLM REQUIRED)
+
+
 # Access to Radium headers and declarations/defintions
 include_directories(
     .
     ${RADIUM_INCLUDE_DIR}
-    ${EIGEN3_INCLUDE_DIR}
+    ${EIGEN_INCLUDE_DIR}
     ${ASSIMP_INCLUDE_DIR}
 )
 
@@ -31,8 +35,8 @@ include_directories(
 # Get files
 #file( GLOB file_sources *.cpp *.c )
 #file( GLOB file_headers *.hpp *.h )
-file( GLOB file_sources main.cpp minimalradium.cpp)
-file( GLOB file_headers minimalradium.hpp)
+file( GLOB file_sources main.cpp )
+file( GLOB file_headers          )
 
 
 # Generate an executable

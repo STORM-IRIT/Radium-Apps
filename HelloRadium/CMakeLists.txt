@@ -1,53 +1,46 @@
-set(app_target helloRadium)
+#-------------------------------------------------------------------------------
+# exampleApp executables setup
 
-# Qt stuff //////////////////////
+project(HelloRadium)
 
-find_package(OpenGL     REQUIRED)
+find_package( Radium REQUIRED RadiumCore RadiumEngine RadiumGuiBase RadiumPluginBase)
 find_package(Qt5 COMPONENTS Core Widgets OpenGL REQUIRED)
+set( Qt5_LIBRARIES Qt5::Core Qt5::Widgets Qt5::OpenGL )
 
-set( Qt5_LIBRARIES
-     Qt5::Core
-     Qt5::Widgets
-     Qt5::OpenGL )
-
-set(CMAKE_INCLUDE_CURRENT_DIR ON)
 set(CMAKE_AUTOMOC ON)
 set(CMAKE_AUTORCC ON)
 
-if(${CMAKE_MAJOR_VERSION}.${CMAKE_MINOR_VERSION} VERSION_GREATER "3.9")
-    cmake_policy(SET CMP0071 NEW)
+add_executable(${PROJECT_NAME} MACOSX_BUNDLE
+    minimalradium.hpp
+    minimalradium.cpp
+    minimalapp.hpp
+    minimalapp.cpp
+    main.cpp)
+
+target_link_libraries (${PROJECT_NAME} PUBLIC
+    Radium::RadiumCore
+    Radium::RadiumEngine
+    Radium::RadiumGuiBase
+    ${Qt5_LIBRARIES})
+target_include_directories( ${PROJECT_NAME} PRIVATE ${CMAKE_CURRENT_SOURCE_DIR} )
+
+set(APP_NAME "Radium${PROJECT_NAME}")
+set(APP_IDEN "com.radium.${PROJECT_NAME}")
+
+if(APPLE)
+    set_target_properties(${PROJECT_NAME} PROPERTIES MACOSX_BUNDLE_BUNDLE_NAME ${APP_NAME})
+    set_target_properties(${PROJECT_NAME} PROPERTIES MACOSX_BUNDLE_BUNDLE_GUI_IDENTIFIER "${APP_IDEN}")
+    set_target_properties(${PROJECT_NAME} PROPERTIES MACOSX_BUNDLE_LONG_VERSION_STRING "${PROJECT_VERSION_MAJOR}.${PROJECT_VERSION_MINOR}.${PROJECT_VERSION_PATCH}")
+    set_target_properties(${PROJECT_NAME} PROPERTIES MACOSX_BUNDLE_SHORT_VERSION_STRING "${PROJECT_VERSION_MAJOR}.${PROJECT_VERSION_MINOR}")
 endif()
 
-# ///////////////////////////////
+install(TARGETS ${PROJECT_NAME} BUNDLE DESTINATION "." RUNTIME DESTINATION bin)
 
-# Access to Radium headers and declarations/defintions
-include_directories(
-    .
-    ${RADIUM_INCLUDE_DIRS}
-)
+if(APPLE)
+    include( BundleUtilities )
+    install(CODE "
+        include(BundleUtilities)
+        fixup_bundle(${CMAKE_INSTALL_PREFIX}/${PROJECT_NAME}.app \"\" \"${CMAKE_INSTALL_PREFIX}/${CMAKE_INSTALL_LIBDIR}\")
+    " COMPONENT Runtime)
+endif()
 
-
-
-# Get files
-file( GLOB file_sources *.cpp *.c )
-file( GLOB file_headers *.hpp *.h )
-
-
-# Generate an executable
-add_executable( ${app_target} ${file_sources} ${file_headers} )
-
-add_dependencies( ${app_target} radiumEngine radiumGuiBase radiumCore radium_assets)
-
-
-# Link good libraries
-target_link_libraries( ${app_target} # target
-    ${RADIUM_LIBRARIES}              # Radium libs
-    ${GLBINDING_LIBRARIES}           # Radium dep
-    ${Qt5_LIBRARIES}                 # the Qt beast
-)
-
-if (MSVC)
-    set_property( TARGET ${app_target} PROPERTY IMPORTED_LOCATION "${RADIUM_BINARY_OUTPUT_PATH}" )
-endif(MSVC)
-
-radium_cotire( ${app_target} )

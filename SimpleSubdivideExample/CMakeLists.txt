@@ -1,70 +1,31 @@
-# Build Simplifier
+#-------------------------------------------------------------------------------
+# exampleApp executables setup
 
-set(app_target subdivide)
-set(CMAKE_INCLUDE_CURRENT_DIR ON)
-set(CMAKE_AUTOMOC ON)
-set(CMAKE_AUTORCC ON)
+project(SimpleSubdivide)
 
-find_package(OpenGL     REQUIRED)
-find_package(Qt5 COMPONENTS Core Widgets OpenGL REQUIRED)
+add_executable(${PROJECT_NAME} MACOSX_BUNDLE main.cpp)
 
-set( Qt5_LIBRARIES
-     Qt5::Core
-     Qt5::Widgets
-     Qt5::OpenGL )
+find_package( Radium REQUIRED RadiumCore RadiumIO)
 
-set(app_libs
-    ${RADIUM_LIBRARIES}             # Radium libs
-    ${GLBINDING_LIBRARIES}          # Radium dep
-    ${ASSIMP_LIBRARIES}             # Radium dep
-    ${Qt5_LIBRARIES}                # the Qt beast
-    ${OPENMESH_LIBRARIES}           # Radium dep
-    )
+target_link_libraries (${PROJECT_NAME} PUBLIC Radium::RadiumCore Radium::RadiumIO)
 
-file(GLOB_RECURSE app_sources *.cpp)
-file(GLOB_RECURSE app_headers *.h *.hpp)
-file(GLOB_RECURSE app_inlines *.inl)
-file(GLOB_RECURSE app_uis     *.ui)
-qt5_wrap_ui(app_uis_moc ${app_uis})
+set(APP_NAME "Radium${PROJECT_NAME}")
+set(APP_IDEN "com.radium.${PROJECT_NAME}")
 
-file(GLOB resources ${CMAKE_CURRENT_SOURCE_DIR}/../../*.qrc)
+if(APPLE)
+    set_target_properties(${PROJECT_NAME} PROPERTIES MACOSX_BUNDLE_BUNDLE_NAME ${APP_NAME})
+    set_target_properties(${PROJECT_NAME} PROPERTIES MACOSX_BUNDLE_BUNDLE_GUI_IDENTIFIER "${APP_IDEN}")
+    set_target_properties(${PROJECT_NAME} PROPERTIES MACOSX_BUNDLE_LONG_VERSION_STRING "${PROJECT_VERSION_MAJOR}.${PROJECT_VERSION_MINOR}.${PROJECT_VERSION_PATCH}")
+    set_target_properties(${PROJECT_NAME} PROPERTIES MACOSX_BUNDLE_SHORT_VERSION_STRING "${PROJECT_VERSION_MAJOR}.${PROJECT_VERSION_MINOR}")
+endif()
 
+install(TARGETS ${PROJECT_NAME} BUNDLE DESTINATION "." RUNTIME DESTINATION bin)
 
-include_directories(
-    .
-    ${RADIUM_INCLUDE_DIRS}
-    ${PATATE_INCLUDE_DIR}
-    ${CMAKE_CURRENT_BINARY_DIR} # Moc
-    )
+if(APPLE)
+    include( BundleUtilities )
+    install(CODE "
+        include(BundleUtilities)
+        fixup_bundle(${CMAKE_INSTALL_PREFIX}/${PROJECT_NAME}.app \"\" \"${CMAKE_INSTALL_PREFIX}/${CMAKE_INSTALL_LIBDIR}\")
+    " COMPONENT Runtime)
+endif()
 
-add_executable(
-    ${app_target}
-    ${app_sources}
-    ${app_headers}
-    ${app_inlines}
-    ${app_uis_moc}
-    ${resources}
-    )
-
-target_link_libraries(
-    ${app_target}
-    ${app_libs}
-    )
-
-add_dependencies( ${app_target} radiumEngine radiumGuiBase radiumCore radiumIO radium_assets radium_configs)
-
-#install( DIRECTORY . DESTINATION include FILES_MATCHING PATTERN "*.hpp" PATTERN "*.inl" PATTERN "*.h" )
-#install( FILES ${engine_shaders} DESTINATION Shaders )
-#install( DIRECTORY ${CMAKE_SOURCE_DIR}/Assets/. DESTINATION Assets )
-#install( TARGETS ${app_target} ${core_target} ${engine_target} ${guibase_target}
-#    RUNTIME DESTINATION bin
-#    LIBRARY DESTINATION lib
-#    ARCHIVE DESTINATION lib )
-
-if (MSVC)
-    #This will work from CMake 3.6
-    set_property( DIRECTORY ${CMAKE_SOURCE_DIR} PROPERTY VS_STARTUP_PROJECT ${app_target})
-    set_property( TARGET ${app_target} PROPERTY IMPORTED_LOCATION "${RADIUM_SUBMODULES_INSTALL_DIRECTORY}/bin" )
-endif(MSVC)
-
-radium_cotire( ${app_target} )

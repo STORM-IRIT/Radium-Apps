@@ -21,7 +21,7 @@ class MinimalApp : public QApplication
     */
     MinimalApp( int& argc, char** argv );
 
-    ~MinimalApp();
+    virtual ~MinimalApp();
 
   public slots:
 

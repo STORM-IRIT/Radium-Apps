@@ -13,6 +13,7 @@ find_package( Radium REQUIRED RadiumCore RadiumEngine RadiumGuiBase RadiumPlugin
 #------------------------------------------------------------------------------
 # Application specific
 
+
 find_package(Qt5 COMPONENTS Core Widgets OpenGL REQUIRED)
 set( Qt5_LIBRARIES Qt5::Core Qt5::Widgets Qt5::OpenGL )
 

@@ -26,7 +26,9 @@ find_package( Radium REQUIRED RadiumCore RadiumEngine RadiumGuiBase RadiumPlugin
 find_package( ... )
 
 # set up the application. For portability reasons, do not forget the MACOSX_BUNDLE
-add_executable(${PROJECT_NAME} MACOSX_BUNDLE
+# on MacOsX, if MACOSX_BUNDLE is not set, generate a command line tool
+# if MACOSX_BUNDLE is set, generate a relocatable bundle
+add_executable(${PROJECT_NAME} [MACOSX_BUNDLE]
     # give here the list of source files associated with the applciation
     # this list must contain all the files (.cpp, .hpp, .ui, ...) of the application
 

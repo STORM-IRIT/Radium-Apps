@@ -1,46 +1,64 @@
 # Build MainApplication
-
-set(app_target main-app)
-
-set(CMAKE_INCLUDE_CURRENT_DIR ON)
-set(CMAKE_AUTOMOC ON)
-set(CMAKE_AUTORCC ON)
-
+cmake_minimum_required(VERSION 3.8)
 if(${CMAKE_MAJOR_VERSION}.${CMAKE_MINOR_VERSION} VERSION_GREATER "3.9")
     cmake_policy(SET CMP0071 NEW)
 endif()
 
-find_package(OpenGL     REQUIRED)
+#-------------------------------------------------------------------------------
+# exampleApp executables setup
+project(main-app)
+
+find_package( Radium REQUIRED RadiumCore RadiumEngine RadiumGuiBase RadiumPluginBase RadiumIO)
+
+#------------------------------------------------------------------------------
+# Application specific
+
 find_package(Qt5 COMPONENTS Core Widgets OpenGL REQUIRED)
+set( Qt5_LIBRARIES Qt5::Core Qt5::Widgets Qt5::OpenGL )
 
-set( Qt5_LIBRARIES
-     Qt5::Core
-     Qt5::Widgets
-     Qt5::OpenGL )
+set(CMAKE_AUTOMOC ON)
+set(CMAKE_AUTORCC ON)
 
-set(app_libs
-    ${RADIUM_LIBRARIES}             # Radium libs
-    ${GLBINDING_LIBRARIES}          # Radium dep
-    ${ASSIMP_LIBRARIES}             # Radium dep
-    ${Qt5_LIBRARIES}                # the Qt beast
+set(app_sources
+        main.cpp
+        MainApplication.cpp
+        Gui/ColorWidget.cpp
+        Gui/MainWindow.cpp
+        Gui/MaterialEditor.cpp
+        Gui/TransformEditorWidget.cpp
     )
 
-file(GLOB_RECURSE app_sources *.cpp)
-file(GLOB_RECURSE app_headers *.h *.hpp)
-file(GLOB_RECURSE app_inlines *.inl)
-file(GLOB_RECURSE app_uis     *.ui)
+set(app_headers
+        MainApplication.hpp
+        Gui/ColorWidget.hpp
+        Gui/MainWindow.hpp
+        Gui/MaterialEditor.hpp
+        Gui/RotationEditor.hpp
+        Gui/TransformEditorWidget.hpp
+        Gui/VectorEditor.hpp
+   )
+
+set(app_uis
+        Gui/ui/MainWindow.ui
+        Gui/ui/MaterialEditor.ui
+        Gui/ui/RotationEditor.ui
+        Gui/ui/VectorEditor.ui
+   )
+
 qt5_wrap_ui(app_uis_moc ${app_uis})
-file(GLOB resources Resources/*.qrc)
+
+set(app_resources
+        Resources/ApplicationIcons.qrc
+   )
 
 
+set(CMAKE_INCLUDE_CURRENT_DIR ON)
 include_directories(
-    .
-    ${RADIUM_INCLUDE_DIRS}
     ${CMAKE_CURRENT_BINARY_DIR} # Moc
     )
 
 add_executable(
-    ${app_target}
+    ${PROJECT_NAME} MACOSX_BUNDLE
     ${app_sources}
     ${app_headers}
     ${app_inlines}
@@ -48,25 +66,15 @@ add_executable(
     ${resources}
     )
 
-target_link_libraries(
-    ${app_target}
-    ${app_libs}
-    )
+target_link_libraries (${PROJECT_NAME} PUBLIC
+    Radium::RadiumCore
+    Radium::RadiumEngine
+    Radium::RadiumGuiBase
+    Radium::RadiumIO
+    ${Qt5_LIBRARIES})
 
-add_dependencies( ${app_target} radiumEngine radiumGuiBase radiumPluginBase radiumCore radiumIO radium_assets radium_configs glbinding_lib)
+configure_radium_app_install(
+        NAME ${PROJECT_NAME}
+)
 
-#install( DIRECTORY . DESTINATION include FILES_MATCHING PATTERN "*.hpp" PATTERN "*.inl" PATTERN "*.h" )
-#install( FILES ${engine_shaders} DESTINATION Shaders )
-#install( DIRECTORY ${CMAKE_SOURCE_DIR}/Assets/. DESTINATION Assets )
-#install( TARGETS ${app_target} ${core_target} ${engine_target} ${guibase_target}
-#    RUNTIME DESTINATION bin
-#    LIBRARY DESTINATION lib
-#    ARCHIVE DESTINATION lib )
-
-if (MSVC)
-    #This will work from CMake 3.6
-    set_property( DIRECTORY ${CMAKE_SOURCE_DIR} PROPERTY VS_STARTUP_PROJECT ${app_target})
-    set_property( TARGET ${app_target} PROPERTY IMPORTED_LOCATION "${RADIUM_BINARY_OUTPUT_PATH}" )
-endif(MSVC)
-
-radium_cotire( ${app_target} )
+# radium_cotire( ${app_target} )

@@ -7,6 +7,13 @@ endif()
 #-------------------------------------------------------------------------------
 # exampleApp executables setup
 project(main-app)
+# Set default install location to installed-<Compiler_ID> folder in build dir
+# we do not want to install to /usr by default
+if (CMAKE_INSTALL_PREFIX_INITIALIZED_TO_DEFAULT)
+    set (CMAKE_INSTALL_PREFIX "${CMAKE_CURRENT_BINARY_DIR}/installed-${CMAKE_CXX_COMPILER_ID}" CACHE PATH
+            "Install path prefix, prepended onto install directories." FORCE )
+    message( "Set install prefix to ${CMAKE_INSTALL_PREFIX}" )
+endif()
 
 find_package( Radium REQUIRED RadiumCore RadiumEngine RadiumGuiBase RadiumPluginBase RadiumIO)
 
@@ -76,6 +83,7 @@ target_link_libraries (${PROJECT_NAME} PUBLIC
 
 configure_radium_app_install(
         NAME ${PROJECT_NAME}
+        USE_PLUGINS
 )
 
 # radium_cotire( ${app_target} )

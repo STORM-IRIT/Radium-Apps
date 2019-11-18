@@ -170,6 +170,12 @@ class MainWindow : public Ra::GuiBase::MainWindowInterface, private Ui::MainWind
     /// activate flight-mode camera manipulator
     void activateFlightManipulator();
 
+    /// Allow to manage registered plugin paths
+    /// @todo : for now, only add a new path ... make full management available
+    void addPluginPath();
+    /// Remove all registered plugin directories
+    void clearPluginPaths();
+
   private:
     /// Stores the internal model of engine objects for selection and visibility.
     GuiBase::ItemModel* m_itemModel;

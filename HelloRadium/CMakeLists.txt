@@ -10,7 +10,7 @@ if (CMAKE_INSTALL_PREFIX_INITIALIZED_TO_DEFAULT)
     message( "Set install prefix to ${CMAKE_INSTALL_PREFIX}" )
 endif()
 
-find_package( Radium REQUIRED RadiumCore RadiumEngine RadiumGuiBase RadiumPluginBase RadiumIO)
+find_package( Radium REQUIRED Core Engine GuiBase PluginBase IO)
 
 #------------------------------------------------------------------------------
 # Application specific
@@ -29,9 +29,9 @@ add_executable(${PROJECT_NAME} MACOSX_BUNDLE
     main.cpp)
 
 target_link_libraries (${PROJECT_NAME} PUBLIC
-    Radium::RadiumCore
-    Radium::RadiumEngine
-    Radium::RadiumGuiBase
+    Radium::Core
+    Radium::Engine
+    Radium::GuiBase
     ${Qt5_LIBRARIES})
 target_include_directories( ${PROJECT_NAME} PRIVATE ${CMAKE_CURRENT_SOURCE_DIR} )
 

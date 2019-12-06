@@ -19,15 +19,15 @@ class RadiumEngine;
 namespace DummyPlugin {
 class DummySystem;
 
-class DummyPlugin : public QObject, Ra::Plugins::RadiumPluginInterface
+class DUMMY_PLUGIN_API DummyPlugin : public QObject, Ra::Plugins::RadiumPluginInterface
 {
     Q_OBJECT
-    Q_PLUGIN_METADATA( IID "foo.bar.RadiumEngine.PluginInterface" )
+    Q_RADIUM_PLUGIN_METADATA
     Q_INTERFACES( Ra::Plugins::RadiumPluginInterface )
 
   public:
     DummyPlugin() = default;
-    ~DummyPlugin();
+    ~DummyPlugin() override;
 
     void registerPlugin( const Ra::Plugins::Context& context ) override;
 
@@ -36,6 +36,9 @@ class DummyPlugin : public QObject, Ra::Plugins::RadiumPluginInterface
 
     bool doAddMenu() override;
     QMenu* getMenu() override;
+
+    inline bool doAddAction( int& ) override { return false; }
+    inline QAction* getAction( int ) override { return nullptr; }
 
   private slots:
     void sayHello();

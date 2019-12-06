@@ -5,6 +5,8 @@
 
 #include <Engine/System/System.hpp>
 
+#include <map>
+
 namespace Ra {
 namespace Core {
 struct TriangleMesh;
@@ -27,23 +29,17 @@ struct DummyData {
     int bar;
 };
 
-class DummySystem : public Ra::Engine::System
+class DUMMY_PLUGIN_API DummySystem : public Ra::Engine::System
 {
   public:
     DummySystem();
-    virtual ~DummySystem();
+    ~DummySystem() override;
 
-    virtual void initialize() override;
-    virtual void handleDataLoading( Ra::Engine::Entity* entity,
-                                    const std::string& rootFolder,
-                                    const std::map<std::string, Ra::Core::Any>& data ) override;
+    virtual void handleAssetLoading( Ra::Engine::Entity* entity,
+                                    const Ra::Core::Asset::FileData* data ) override;
 
     virtual void generateTasks( Ra::Core::TaskQueue* taskQueue,
                                 const Ra::Engine::FrameInfo& frameInfo ) override;
-
-  protected:
-    virtual Ra::Engine::Component* addComponentToEntityInternal( Ra::Engine::Entity* entity,
-                                                                 uint id ) override;
 
   private:
     DummyData* m_data;

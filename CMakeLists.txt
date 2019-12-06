@@ -13,5 +13,6 @@ endif()
 
 
 add_subdirectory(MainApplication)
+add_subdirectory(MainApplication-Plugins) # temporary: plugins need to be moved out of this repository
 add_subdirectory(HelloRadium)
 add_subdirectory(SimpleSubdivideExample)

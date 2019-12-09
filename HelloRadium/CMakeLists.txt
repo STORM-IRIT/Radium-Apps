@@ -1,53 +1,41 @@
-set(app_target helloRadium)
+cmake_minimum_required(VERSION 3.6)
+#-------------------------------------------------------------------------------
+# exampleApp executables setup
+project(HelloRadium)
+# Set default install location to installed-<Compiler_ID> folder in build dir
+# we do not want to install to /usr by default
+if (CMAKE_INSTALL_PREFIX_INITIALIZED_TO_DEFAULT)
+    set (CMAKE_INSTALL_PREFIX "${CMAKE_CURRENT_BINARY_DIR}/installed-${CMAKE_CXX_COMPILER_ID}" CACHE PATH
+            "Install path prefix, prepended onto install directories." FORCE )
+    message( "Set install prefix to ${CMAKE_INSTALL_PREFIX}" )
+endif()
 
-# Qt stuff //////////////////////
+find_package( Radium REQUIRED Core Engine GuiBase PluginBase IO)
 
-find_package(OpenGL     REQUIRED)
+#------------------------------------------------------------------------------
+# Application specific
+
 find_package(Qt5 COMPONENTS Core Widgets OpenGL REQUIRED)
+set( Qt5_LIBRARIES Qt5::Core Qt5::Widgets Qt5::OpenGL )
 
-set( Qt5_LIBRARIES
-     Qt5::Core
-     Qt5::Widgets
-     Qt5::OpenGL )
-
-set(CMAKE_INCLUDE_CURRENT_DIR ON)
 set(CMAKE_AUTOMOC ON)
 set(CMAKE_AUTORCC ON)
 
-if(${CMAKE_MAJOR_VERSION}.${CMAKE_MINOR_VERSION} VERSION_GREATER "3.9")
-    cmake_policy(SET CMP0071 NEW)
-endif()
+add_executable(${PROJECT_NAME} MACOSX_BUNDLE
+    minimalradium.hpp
+    minimalradium.cpp
+    minimalapp.hpp
+    minimalapp.cpp
+    main.cpp)
 
-# ///////////////////////////////
+target_link_libraries (${PROJECT_NAME} PUBLIC
+    Radium::Core
+    Radium::Engine
+    Radium::GuiBase
+    ${Qt5_LIBRARIES})
+target_include_directories( ${PROJECT_NAME} PRIVATE ${CMAKE_CURRENT_SOURCE_DIR} )
 
-# Access to Radium headers and declarations/defintions
-include_directories(
-    .
-    ${RADIUM_INCLUDE_DIRS}
+# call the installation configuration (defined in RadiumConfig.cmake)
+configure_radium_app_install(
+        NAME ${PROJECT_NAME}
 )
-
-
-
-# Get files
-file( GLOB file_sources *.cpp *.c )
-file( GLOB file_headers *.hpp *.h )
-
-
-# Generate an executable
-add_executable( ${app_target} ${file_sources} ${file_headers} )
-
-add_dependencies( ${app_target} radiumEngine radiumGuiBase radiumCore radium_assets)
-
-
-# Link good libraries
-target_link_libraries( ${app_target} # target
-    ${RADIUM_LIBRARIES}              # Radium libs
-    ${GLBINDING_LIBRARIES}           # Radium dep
-    ${Qt5_LIBRARIES}                 # the Qt beast
-)
-
-if (MSVC)
-    set_property( TARGET ${app_target} PROPERTY IMPORTED_LOCATION "${RADIUM_BINARY_OUTPUT_PATH}" )
-endif(MSVC)
-
-radium_cotire( ${app_target} )

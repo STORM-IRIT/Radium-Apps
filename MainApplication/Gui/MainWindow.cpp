@@ -112,6 +112,8 @@ void MainWindow::createConnections() {
     connect( actionFlight, &QAction::triggered, this, &MainWindow::activateFlightManipulator );
     connect(
         actionTrackball, &QAction::triggered, this, &MainWindow::activateTrackballManipulator );
+    connect( actionAdd_plugin_path, &QAction::triggered, this, &MainWindow::addPluginPath );
+    connect( actionClear_plugin_paths, &QAction::triggered, this, &MainWindow::clearPluginPaths );
 
     // Toolbox setup
     // to update display when mode is changed
@@ -709,6 +711,20 @@ void MainWindow::onGLInitialized() {
     addRenderer( "Forward Renderer", e );
 }
 
+void MainWindow::addPluginPath() {
+    QString dir = QFileDialog::getExistingDirectory( this,
+                                                     tr( "Open Directory" ),
+                                                     "",
+                                                     QFileDialog::ShowDirsOnly |
+                                                         QFileDialog::DontResolveSymlinks );
+    LOG( logINFO ) << "Adding the directory " << dir.toStdString() << " to the plugin directories.";
+    mainApp->addPluginDirectory( dir.toStdString() );
+}
+
+void MainWindow::clearPluginPaths() {
+    mainApp->clearPluginDirectories();
+}
+
 } // namespace Gui
 } // namespace Ra
 
@@ -720,3 +736,4 @@ void Ra::Gui::MainWindow::on_m_currentColorButton_clicked() {
     QColor c = QColorDialog::getColor( currentColor, this, "Renderer background color" );
     if ( c.isValid() ) { updateBackgroundColor( c ); }
 }
+

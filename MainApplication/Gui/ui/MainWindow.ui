@@ -34,7 +34,17 @@
     <property name="title">
      <string>File</string>
     </property>
+    <widget class="QMenu" name="menuPreferences">
+     <property name="title">
+      <string>Plugins</string>
+     </property>
+     <addaction name="actionAdd_plugin_path"/>
+     <addaction name="actionClear_plugin_paths"/>
+    </widget>
     <addaction name="actionOpenMesh"/>
+    <addaction name="separator"/>
+    <addaction name="actionAbout"/>
+    <addaction name="menuPreferences"/>
     <addaction name="separator"/>
     <addaction name="actionExit"/>
    </widget>
@@ -769,6 +779,24 @@
    </property>
    <property name="shortcut">
     <string>Ctrl+F</string>
+   </property>
+  </action>
+  <action name="actionAbout">
+   <property name="text">
+    <string>About</string>
+   </property>
+  </action>
+  <action name="actionAdd_plugin_path">
+   <property name="text">
+    <string>Add plugin path</string>
+   </property>
+   <property name="shortcut">
+    <string>Ctrl+P</string>
+   </property>
+  </action>
+  <action name="actionClear_plugin_paths">
+   <property name="text">
+    <string>Clear plugin paths</string>
    </property>
   </action>
  </widget>

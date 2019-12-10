@@ -71,7 +71,7 @@ add_executable(
     ${app_headers}
     ${app_inlines}
     ${app_uis_moc}
-    ${resources}
+    ${app_resources}
     )
 
 target_link_libraries (${PROJECT_NAME} PUBLIC

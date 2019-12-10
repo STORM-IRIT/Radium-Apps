@@ -1,6 +1,5 @@
 cmake_minimum_required (VERSION 3.6)
 project(Radium-apps)
-option(RADIUM_APP_FETCH_RADIUM "Fetch, compile and link to a local copy of Radium" OFF)
 
 # set the installation directory for all the apps at once. This will make the same definition ignore on all the
 # included applications
@@ -13,6 +12,5 @@ endif()
 
 
 add_subdirectory(MainApplication)
-add_subdirectory(MainApplication-Plugins) # temporary: plugins need to be moved out of this repository
 add_subdirectory(HelloRadium)
 add_subdirectory(SimpleSubdivideExample)

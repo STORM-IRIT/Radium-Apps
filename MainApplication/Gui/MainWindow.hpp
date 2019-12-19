@@ -25,6 +25,9 @@ namespace Gui {
 class EntityTreeModel;
 class Viewer;
 } // namespace Gui
+namespace GuiBase {
+class Timeline;
+} // namespace GuiBase
 } // namespace Ra
 
 namespace Ra {
@@ -52,6 +55,9 @@ class MainWindow : public Ra::GuiBase::MainWindowInterface, private Ui::MainWind
 
     /// Access the selection manager.
     GuiBase::SelectionManager* getSelectionManager() override;
+
+    /// Access the timeline.
+    GuiBase::Timeline* getTimeline() override;
 
     /// Update the ui from the plugins loaded.
     void updateUi( Plugins::RadiumPluginInterface* plugin ) override;
@@ -110,16 +116,6 @@ class MainWindow : public Ra::GuiBase::MainWindowInterface, private Ui::MainWind
 
     /// Emitted when a new item is selected. An invalid entry is sent when no item is selected.
     void selectedItem( const Engine::ItemEntry& entry );
-
-  private slots:
-    /// Slot for the user requesting to play/pause time through the time actions.
-    void on_actionPlay_triggered( bool checked );
-
-    /// Slot for the user requesting to step time.
-    void on_actionStep_triggered();
-
-    /// Slot for the user requesting to reset time.
-    void on_actionStop_triggered();
 
   private:
     /// Connect qt signals and slots. Called once by the constructor.
@@ -186,6 +182,31 @@ class MainWindow : public Ra::GuiBase::MainWindowInterface, private Ui::MainWind
     /// Remove all registered plugin directories
     void clearPluginPaths();
 
+  private slots:
+    /// Slot for the user requesting to play/pause time through the time actions.
+    void on_actionPlay_triggered( bool checked );
+
+    /// Slot for the user requesting to step time.
+    void on_actionStep_triggered();
+
+    /// Slot for the user requesting to reset time.
+    void on_actionStop_triggered();
+
+    /// Slot for the user requesting to play/pause time through the timeline.
+    void timelinePlay( bool play );
+
+    /// Slot for the user requesting to change the current time through the timeline.
+    void timelineGoTo( double t );
+
+    /// Slot for the user requesting to change the start time through the timeline.
+    void timelineStartChanged( double t );
+
+    /// Slot for the user requesting to change the end time through the timeline.
+    void timelineEndChanged( double t );
+
+    /// Slot for the user requesting to change the time play mode through the timeline.
+    void timelineSetPingPong( bool status );
+
   private:
     /// Stores the internal model of engine objects for selection and visibility.
     GuiBase::ItemModel* m_itemModel{nullptr};
@@ -196,8 +217,14 @@ class MainWindow : public Ra::GuiBase::MainWindowInterface, private Ui::MainWind
     /// Widget to allow material edition.
     std::unique_ptr<MaterialEditor> m_materialEditor{nullptr};
 
-    /// viewer widget
+    /// Viewer widget
     Ra::Gui::Viewer* m_viewer{nullptr};
+
+    /// Timeline gui
+    Ra::GuiBase::Timeline* m_timeline{nullptr};
+
+    /// Guard TimeSystem against issue with Timeline signals.
+    bool m_lockTimeSystem{false};
 };
 
 } // namespace Gui

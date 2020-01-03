@@ -600,7 +600,7 @@ void MainWindow::exportCurrentMesh() {
         const std::shared_ptr<Engine::Displayable>& displ = ro->getMesh();
         const Engine::Mesh* mesh = dynamic_cast<Engine::Mesh*>( displ.get() );
 
-        if ( mesh != nullptr && obj.save( filename, mesh->getTriangleMesh() ) )
+        if ( mesh != nullptr && obj.save( filename, mesh->getCoreGeometry() ) )
         {
             LOG( logINFO ) << "Mesh from " << ro->getName() << " successfully exported to "
                            << filename;

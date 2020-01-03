@@ -25,7 +25,7 @@ cmake_minimum_required(VERSION 3.6)
 # set the name of the project (and then the name of the executable)
 project(HelloRadium)
 
-# find and configura the Radium environment for the application
+# find and configure the Radium environment for the application
 # Note that only the required component of Radium might be fetched.
 find_package( Radium REQUIRED Core Engine GuiBase PluginBase IO)
 
@@ -70,7 +70,7 @@ You then must first create a buid directory that will be the root of the buildtr
 If the Radium environment was installed in the directory `pathToRadiumInstallation`,
 configure the project with :
 
-    cmake -DRadium_DIR=pathToRadiumInstallation/lib/cmake/Radium
+    cmake ../ -DRadium_DIR=pathToRadiumInstallation/lib/cmake/Radium
 
 
 By default, the application will be installed in a directory

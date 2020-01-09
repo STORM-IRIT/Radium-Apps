@@ -1,6 +1,7 @@
 
 #include <minimalradium.hpp>
 
+#include <Core/Containers/MakeShared.hpp>
 #include <Core/Geometry/MeshPrimitives.hpp>
 #include <Core/Tasks/Task.hpp>
 #include <Core/Tasks/TaskQueue.hpp>
@@ -8,6 +9,7 @@
 
 #include <Engine/Renderer/Mesh/Mesh.hpp>
 
+#include <Engine/Renderer/Material/BlinnPhongMaterial.hpp>
 #include <Engine/Renderer/RenderObject/RenderObject.hpp>
 #include <Engine/Renderer/RenderObject/RenderObjectManager.hpp>
 
@@ -22,12 +24,29 @@ MinimalComponent::MinimalComponent( Ra::Engine::Entity* entity ) :
 /// This function is called when the component is properly
 /// setup, i.e. it has an entity.
 void MinimalComponent::initialize() {
-    // Create a cube mesh render object.
-    std::shared_ptr<Ra::Engine::Mesh> display( new Ra::Engine::Mesh( "Cube" ) );
-    display->loadGeometry( Ra::Core::Geometry::makeSharpBox( {0.1f, 0.1f, 0.1f} ) );
-    auto renderObject = Ra::Engine::RenderObject::createRenderObject(
-        "CubeRO", this, Ra::Engine::RenderObjectType::Geometry, display );
-    addRenderObject( renderObject );
+    // Create the Engine mesh
+    std::shared_ptr<Ra::Engine::Mesh> theMesh( new Ra::Engine::Mesh( "Cube" ) );
+    // Set the core geometry of the engine mesh
+    theMesh->loadGeometry( Ra::Core::Geometry::makeSharpBox( {0.1f, 0.1f, 0.1f} ) );
+    // Create the desired material - here a Ra::Engine::BlinnPhongMaterial
+    auto theMaterial = Ra::Core::make_shared<Ra::Engine::BlinnPhongMaterial>( "theCubeMaterial" );
+    // Set the material parameters
+    theMaterial->m_kd = Ra::Core::Utils::Color::Green();
+    theMaterial->m_ks = Ra::Core::Utils::Color::White();
+    theMaterial->m_ns = 64_ra;
+    // Create the render technique
+    Ra::Engine::RenderTechnique theRenderTechnique;
+    // Associate the material
+    theRenderTechnique.setMaterial( theMaterial );
+    // Get the default rendertechnique configurator for the material
+    auto builder = Ra::Engine::EngineRenderTechniques::getDefaultTechnique( "BlinnPhong" );
+    // Configure the render technique for an opaque material (false arg)
+    builder.second( theRenderTechnique, false );
+    // Create and add the renderObject to the component
+    auto theRenderObject = Ra::Engine::RenderObject::createRenderObject(
+        "CubeRO", this, Ra::Engine::RenderObjectType::Geometry, theMesh, theRenderTechnique );
+    // Add the renderObject to the component
+    addRenderObject( theRenderObject );
 }
 
 /// This function will spin our cube

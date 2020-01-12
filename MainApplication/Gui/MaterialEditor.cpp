@@ -190,5 +190,5 @@ void Ra::Gui::MaterialEditor::on_m_closeButton_clicked() {
 }
 
 void Ra::Gui::MaterialEditor::on_kUsePerVertex_clicked( bool checked ) {
-    if ( m_renderObject && m_usable ) { m_blinnphongmaterial->m_perVertexColor = checked; }
+    if ( m_renderObject && m_usable ) { m_blinnphongmaterial->m_hasPerVertexKd = checked; }
 }

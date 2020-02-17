@@ -133,11 +133,12 @@ void MaterialEditor::changeRenderObject( Core::Utils::Index roIdx ) {
         {
             m_BlinnPhongGroup->hide();
 
-            auto genericMaterial = m_renderObject->getRenderTechnique()->getMaterial();
+            auto genericMaterial = dynamic_cast<const Ra::Engine::Material*>(
+                m_renderObject->getRenderTechnique()->getParametersProvider() );
             if ( genericMaterial->getMaterialName() == "BlinnPhong" )
             {
-                m_blinnphongmaterial =
-                    dynamic_cast<Ra::Engine::BlinnPhongMaterial*>( genericMaterial.get() );
+                m_blinnphongmaterial = const_cast<Ra::Engine::BlinnPhongMaterial*>(
+                    dynamic_cast<const Ra::Engine::BlinnPhongMaterial*>( genericMaterial ) );
                 updateBlinnPhongViz();
                 m_BlinnPhongGroup->show();
             }

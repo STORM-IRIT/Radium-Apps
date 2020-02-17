@@ -353,11 +353,12 @@ void MainWindow::onSelectionChanged( const QItemSelection& /*selected*/,
             m_editRenderObjectButton->setEnabled( true );
 
             m_materialEditor->changeRenderObject( ent.m_roIndex );
-            const std::string& shaderName = mainApp->m_engine->getRenderObjectManager()
-                                                ->getRenderObject( ent.m_roIndex )
-                                                ->getRenderTechnique()
-                                                ->getMaterial()
-                                                ->getMaterialName();
+            auto material = dynamic_cast<const Ra::Engine::Material*>(
+                mainApp->m_engine->getRenderObjectManager()
+                    ->getRenderObject( ent.m_roIndex )
+                    ->getRenderTechnique()
+                    ->getParametersProvider() );
+            const std::string& shaderName = material->getMaterialName();
             CORE_ASSERT( m_currentShaderBox->findText( shaderName.c_str() ) != -1,
                          "RO shaders must be already added to the list" );
             m_currentShaderBox->setCurrentText( shaderName.c_str() );
@@ -468,25 +469,32 @@ void MainWindow::updateBackgroundColor( QColor c ) {
     m_viewer->setBackgroundColor( bgk );
 }
 
+// Is this still a useful feature ?
 void MainWindow::changeRenderObjectShader( const QString& shaderName ) {
-    std::string name = shaderName.toStdString();
-    if ( name.empty() ) { return; }
+    // FIXME : is this still a wanted feature. Commented out for now. if this feature is wanted,
+    // need to find a
+    //  way to change the render-technique.
+    /*
+        std::string name = shaderName.toStdString();
+        if ( name.empty() ) { return; }
 
-    const ItemEntry& item = m_selectionManager->currentItem();
-    const Engine::ShaderConfiguration config =
-        Ra::Engine::ShaderConfigurationFactory::getConfiguration( name );
+        const ItemEntry& item = m_selectionManager->currentItem();
+        const Engine::ShaderConfiguration config =
+            Ra::Engine::ShaderConfigurationFactory::getConfiguration( name );
 
-    auto vector_of_ros = getItemROs( mainApp->m_engine.get(), item );
-    for ( const auto& ro_index : vector_of_ros )
-    {
-        const auto& ro = mainApp->m_engine->getRenderObjectManager()->getRenderObject( ro_index );
-        if ( ro->getRenderTechnique()->getMaterial()->getMaterialName() != name )
+        auto vector_of_ros = getItemROs( mainApp->m_engine.get(), item );
+        for ( const auto& ro_index : vector_of_ros )
         {
-            // FIXME: this changes only the render technique, not the associated shader.
-            auto builder = Ra::Engine::EngineRenderTechniques::getDefaultTechnique( name );
-            builder.second( *ro->getRenderTechnique().get(), false );
+            const auto& ro = mainApp->m_engine->getRenderObjectManager()->getRenderObject( ro_index
+       ); if ( ro->getRenderTechnique()->getMaterial()->getMaterialName() != name )
+            {
+                // FIXME: this changes only the render technique, not the associated shader.
+
+                auto builder = Ra::Engine::EngineRenderTechniques::getDefaultTechnique( name );
+                builder.second( *ro->getRenderTechnique().get(), false );
+            }
         }
-    }
+    */
 }
 
 void Gui::MainWindow::setROVisible( Core::Utils::Index roIndex, bool visible ) {
@@ -664,8 +672,9 @@ void MainWindow::postLoadFile( const std::string& filename ) {
     {
         if ( ro->getType() == Engine::RenderObjectType::Geometry )
         {
-            const std::string& shaderName =
-                ro->getRenderTechnique()->getMaterial()->getMaterialName();
+            auto material = dynamic_cast<const Ra::Engine::Material*>(
+                ro->getRenderTechnique()->getParametersProvider() );
+            const std::string& shaderName = material->getMaterialName();
             m_currentShaderBox->addItem( QString( shaderName.c_str() ) );
         }
     }

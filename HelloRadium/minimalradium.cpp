@@ -36,12 +36,12 @@ void MinimalComponent::initialize() {
     theMaterial->m_ns = 64_ra;
     // Create the render technique
     Ra::Engine::RenderTechnique theRenderTechnique;
-    // Associate the material
-    theRenderTechnique.setMaterial( theMaterial );
     // Get the default rendertechnique configurator for the material
     auto builder = Ra::Engine::EngineRenderTechniques::getDefaultTechnique( "BlinnPhong" );
     // Configure the render technique for an opaque material (false arg)
     builder.second( theRenderTechnique, false );
+    // Associate the material as parameter proviedr for rendering
+    theRenderTechnique.setParametersProvider( theMaterial );
     // Create and add the renderObject to the component
     auto theRenderObject = Ra::Engine::RenderObject::createRenderObject(
         "CubeRO", this, Ra::Engine::RenderObjectType::Geometry, theMesh, theRenderTechnique );

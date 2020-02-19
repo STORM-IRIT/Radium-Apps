@@ -663,6 +663,7 @@ void MainWindow::fitCamera() {
 }
 
 void MainWindow::postLoadFile( const std::string& filename ) {
+    m_viewer->getRenderer()->buildAllRenderTechniques();
     m_selectionManager->clear();
     m_currentShaderBox->clear();
     m_currentShaderBox->setEnabled( false );

@@ -353,11 +353,9 @@ void MainWindow::onSelectionChanged( const QItemSelection& /*selected*/,
             m_editRenderObjectButton->setEnabled( true );
 
             m_materialEditor->changeRenderObject( ent.m_roIndex );
-            auto material = dynamic_cast<const Ra::Engine::Material*>(
-                mainApp->m_engine->getRenderObjectManager()
-                    ->getRenderObject( ent.m_roIndex )
-                    ->getRenderTechnique()
-                    ->getParametersProvider() );
+            auto material = mainApp->m_engine->getRenderObjectManager()
+                                ->getRenderObject( ent.m_roIndex )
+                                ->getMaterial();
             const std::string& shaderName = material->getMaterialName();
             CORE_ASSERT( m_currentShaderBox->findText( shaderName.c_str() ) != -1,
                          "RO shaders must be already added to the list" );
@@ -673,8 +671,7 @@ void MainWindow::postLoadFile( const std::string& filename ) {
     {
         if ( ro->getType() == Engine::RenderObjectType::Geometry )
         {
-            auto material = dynamic_cast<const Ra::Engine::Material*>(
-                ro->getRenderTechnique()->getParametersProvider() );
+            auto material                 = ro->getMaterial();
             const std::string& shaderName = material->getMaterialName();
             m_currentShaderBox->addItem( QString( shaderName.c_str() ) );
         }

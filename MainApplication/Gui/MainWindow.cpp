@@ -71,7 +71,7 @@ MainWindow::MainWindow( QWidget* parent ) : MainWindowInterface( parent ) {
     headers << tr( "Entities -> Components" );
     m_itemModel = new GuiBase::ItemModel( mainApp->getEngine(), this );
     m_entitiesTreeView->setModel( m_itemModel );
-    m_materialEditor   = new MaterialEditor();
+    m_materialEditor   = std::make_unique<MaterialEditor>();
     m_selectionManager = new GuiBase::SelectionManager( m_itemModel, this );
     m_entitiesTreeView->setSelectionModel( m_selectionManager );
 
@@ -207,6 +207,12 @@ void MainWindow::createConnections() {
              &QCheckBox::stateChanged,
              mainApp,
              &Ra::GuiBase::BaseApplication::setRecordTimings );
+
+    // Material editor
+    connect( m_materialEditor.get(),
+             &MaterialEditor::materialChanged,
+             mainApp,
+             &Ra::GuiBase::BaseApplication::askForUpdate );
 
     // Connect engine signals to the appropriate callbacks
     std::function<void( const Engine::ItemEntry& )> add =

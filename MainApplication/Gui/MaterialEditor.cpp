@@ -55,8 +55,17 @@ MaterialEditor::MaterialEditor( QWidget* parent ) :
     setWindowTitle( "Material Editor" );
 }
 
+void MaterialEditor::updateEngine() {
+    m_blinnphongmaterial->needUpdate();
+    emit materialChanged();
+}
+
 void MaterialEditor::onExpChanged( double v ) {
-    if ( m_renderObject && m_usable ) { m_blinnphongmaterial->m_ns = Scalar( v ); }
+    if ( m_renderObject && m_usable )
+    {
+        m_blinnphongmaterial->m_ns = Scalar( v );
+        updateEngine();
+    }
 }
 
 void MaterialEditor::onKdColorChanged( int ) {
@@ -66,6 +75,7 @@ void MaterialEditor::onKdColorChanged( int ) {
     {
         m_blinnphongmaterial->m_kd = Core::Utils::Color(
             kdR->value() / 255_ra, kdG->value() / 255_ra, kdB->value() / 255_ra, 1_ra );
+        updateEngine();
     }
 }
 
@@ -76,6 +86,7 @@ void MaterialEditor::onKsColorChanged( int ) {
     {
         m_blinnphongmaterial->m_ks = Core::Utils::Color(
             ksR->value() / 255_ra, ksG->value() / 255_ra, ksB->value() / 255_ra, 1_ra );
+        updateEngine();
     }
 }
 
@@ -92,6 +103,7 @@ void MaterialEditor::newKdColor( const QColor& color ) {
     {
         m_blinnphongmaterial->m_kd =
             Core::Utils::Color( color.redF(), color.greenF(), color.blueF(), 1. );
+        updateEngine();
     }
 }
 
@@ -108,6 +120,7 @@ void MaterialEditor::newKsColor( const QColor& color ) {
     {
         m_blinnphongmaterial->m_ks =
             Core::Utils::Color( color.redF(), color.greenF(), color.blueF(), 1. );
+        updateEngine();
     }
 }
 
@@ -190,5 +203,9 @@ void Ra::Gui::MaterialEditor::on_m_closeButton_clicked() {
 }
 
 void Ra::Gui::MaterialEditor::on_kUsePerVertex_clicked( bool checked ) {
-    if ( m_renderObject && m_usable ) { m_blinnphongmaterial->m_perVertexColor = checked; }
+    if ( m_renderObject && m_usable )
+    {
+        m_blinnphongmaterial->m_perVertexColor = checked;
+        updateEngine();
+    }
 }

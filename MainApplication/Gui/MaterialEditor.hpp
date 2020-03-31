@@ -6,7 +6,6 @@
 #include <memory>
 
 #include <Core/Utils/Index.hpp>
-//#include <Engine/Renderer/RenderObject/RenderObject.hpp>
 
 #include <ui_MaterialEditor.h>
 
@@ -34,7 +33,11 @@ class MaterialEditor : public QWidget, private Ui::MaterialEditor
 
     void changeRenderObject( Ra::Core::Utils::Index roIdx );
 
+  signals:
+    void materialChanged();
+
   private slots:
+
     void updateBlinnPhongViz();
 
     void onKdColorChanged( int );
@@ -51,6 +54,7 @@ class MaterialEditor : public QWidget, private Ui::MaterialEditor
   protected:
     virtual void showEvent( QShowEvent* e ) override;
     virtual void closeEvent( QCloseEvent* e ) override;
+    void updateEngine();
 
   private:
     bool m_visible;

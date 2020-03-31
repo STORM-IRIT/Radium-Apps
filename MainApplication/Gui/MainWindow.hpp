@@ -184,7 +184,7 @@ class MainWindow : public Ra::GuiBase::MainWindowInterface, private Ui::MainWind
     GuiBase::SelectionManager* m_selectionManager;
 
     /// Widget to allow material edition.
-    MaterialEditor* m_materialEditor;
+    std::unique_ptr<MaterialEditor> m_materialEditor{nullptr};
 
     /// viewer widget
     Ra::Gui::Viewer* m_viewer;

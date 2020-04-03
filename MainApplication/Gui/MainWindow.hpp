@@ -6,6 +6,7 @@
 #include <GuiBase/SelectionManager/SelectionManager.hpp>
 #include <GuiBase/TimerData/FrameTimerData.hpp>
 #include <GuiBase/TreeModel/EntityTreeModel.hpp>
+#include <Gui/MaterialEditor.hpp>
 
 #include "ui_MainWindow.h"
 #include <QMainWindow>
@@ -23,7 +24,6 @@ namespace Ra {
 namespace Gui {
 class EntityTreeModel;
 class Viewer;
-class MaterialEditor;
 } // namespace Gui
 } // namespace Ra
 

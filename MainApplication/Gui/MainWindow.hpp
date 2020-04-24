@@ -111,6 +111,16 @@ class MainWindow : public Ra::GuiBase::MainWindowInterface, private Ui::MainWind
     /// Emitted when a new item is selected. An invalid entry is sent when no item is selected.
     void selectedItem( const Engine::ItemEntry& entry );
 
+  private slots:
+    /// Slot for the user requesting to play/pause time through the time actions.
+    void on_actionPlay_triggered( bool checked );
+
+    /// Slot for the user requesting to step time.
+    void on_actionStep_triggered();
+
+    /// Slot for the user requesting to reset time.
+    void on_actionStop_triggered();
+
   private:
     /// Connect qt signals and slots. Called once by the constructor.
     void createConnections();
@@ -178,16 +188,16 @@ class MainWindow : public Ra::GuiBase::MainWindowInterface, private Ui::MainWind
 
   private:
     /// Stores the internal model of engine objects for selection and visibility.
-    GuiBase::ItemModel* m_itemModel;
+    GuiBase::ItemModel* m_itemModel{nullptr};
 
     /// Stores and manages the current selection.
-    GuiBase::SelectionManager* m_selectionManager;
+    GuiBase::SelectionManager* m_selectionManager{nullptr};
 
     /// Widget to allow material edition.
     std::unique_ptr<MaterialEditor> m_materialEditor{nullptr};
 
     /// viewer widget
-    Ra::Gui::Viewer* m_viewer;
+    Ra::Gui::Viewer* m_viewer{nullptr};
 };
 
 } // namespace Gui

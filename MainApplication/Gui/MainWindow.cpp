@@ -586,6 +586,25 @@ void MainWindow::addRenderer( const std::string& name, std::shared_ptr<Engine::R
     m_currentRendererCombo->addItem( QString::fromStdString( name ) );
 }
 
+// macros to call TimeSystem's (if it exists) method X and potentially ask for
+// Viewer's update or continuous update.
+
+void MainWindow::on_actionPlay_triggered( bool checked ) {
+    Ra::Engine::RadiumEngine::getInstance()->play( checked );
+    mainApp->setContinuousUpdate( checked );
+}
+
+void MainWindow::on_actionStop_triggered() {
+    Ra::Engine::RadiumEngine::getInstance()->resetTime();
+    mainApp->askForUpdate();
+    actionPlay->setChecked( false );
+}
+
+void MainWindow::on_actionStep_triggered() {
+    Ra::Engine::RadiumEngine::getInstance()->step();
+    mainApp->askForUpdate();
+}
+
 void MainWindow::onItemAdded( const Engine::ItemEntry& ent ) {
     m_itemModel->addItem( ent );
 }

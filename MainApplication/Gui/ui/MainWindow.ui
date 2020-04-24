@@ -600,6 +600,10 @@
    <addaction name="actionSnapshot"/>
    <addaction name="actionRecord_Frames"/>
    <addaction name="separator"/>
+   <addaction name="actionPlay"/>
+   <addaction name="actionStep"/>
+   <addaction name="actionStop"/>
+   <addaction name="separator"/>
   </widget>
   <action name="actionOpenMesh">
    <property name="text">
@@ -779,6 +783,68 @@
    </property>
    <property name="shortcut">
     <string>Ctrl+F</string>
+   </property>
+  </action>
+  <action name="actionPlay">
+   <property name="checkable">
+    <bool>true</bool>
+   </property>
+   <property name="enabled">
+    <bool>true</bool>
+   </property>
+   <property name="icon">
+    <iconset>
+     <normaloff>:/Resources/Icons/play_off.png</normaloff>
+     <normalon>:/Resources/Icons/pause_off.png</normalon>
+     <activeoff>:/Resources/Icons/play_on.png</activeoff>
+     <activeon>:/Resources/Icons/pause_on.png</activeon>:/Resources/Icons/play_off.png</iconset>
+   </property>
+   <property name="text">
+    <string>play</string>
+   </property>
+   <property name="toolTip">
+    <string>Play / Pause</string>
+   </property>
+   <property name="shortcut">
+    <string>Space</string>
+   </property>
+  </action>
+  <action name="actionStop">
+   <property name="icon">
+    <iconset resource="../../Resources/ApplicationIcons.qrc">
+     <normaloff>:/Resources/Icons/stop_off.png</normaloff>
+     <normalon>:/Resources/Icons/stop_off.png</normalon>
+     <activeoff>:/Resources/Icons/stop_on.png</activeoff>
+     <activeon>:/Resources/Icons/stop_on.png</activeon>:/Resources/Icons/stop_off.png</iconset>
+   </property>
+   <property name="text">
+    <string>stop</string>
+   </property>
+   <property name="toolTip">
+    <string>Reset</string>
+   </property>
+   <property name="shortcut">
+    <string>Backspace</string>
+   </property>
+  </action>
+  <action name="actionStep">
+   <property name="checkable">
+    <bool>false</bool>
+   </property>
+   <property name="icon">
+    <iconset resource="../../Resources/ApplicationIcons.qrc">
+     <normaloff>:/Resources/Icons/step_off.png</normaloff>
+     <normalon>:/Resources/Icons/step_on.png</normalon>
+     <activeoff>:/Resources/Icons/step_on.png</activeoff>:/Resources/Icons/step_off.png</iconset>
+   </property>
+   <property name="text">
+    <string>step</string>
+   </property>
+   <property name="toolTip">
+    <string>Step</string>
+   </property>
+   <property name="shortcut">
+    <string>Ctrl+Space</string>
    </property>
   </action>
   <action name="actionAbout">

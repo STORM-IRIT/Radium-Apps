@@ -13,6 +13,7 @@
 #include <Engine/Renderer/RenderTechnique/RenderTechnique.hpp>
 #include <Engine/Renderer/RenderTechnique/ShaderConfigFactory.hpp>
 #include <Engine/Renderer/Renderers/ForwardRenderer.hpp>
+#include <Engine/System/TimedSystem.hpp>
 #include <GuiBase/TreeModel/EntityTreeModel.hpp>
 #include <GuiBase/Utils/KeyMappingManager.hpp>
 #include <GuiBase/Utils/qt_utils.hpp>
@@ -585,6 +586,44 @@ void MainWindow::addRenderer( const std::string& name, std::shared_ptr<Engine::R
     CORE_ASSERT( id == m_currentRendererCombo->count(), "Inconsistent renderer state" );
     m_currentRendererCombo->addItem( QString::fromStdString( name ) );
 }
+
+// macros to call TimeSystem's (if it exists) method X and potentially ask for
+// Viewer's update or continuous update.
+
+#define TIME_SYSTEM_DO_AND_UPDATE( X )                                                    \
+    {                                                                                     \
+        auto system = Ra::Engine::RadiumEngine::getInstance()->getSystem( "TimeSystem" ); \
+        if ( auto timeSystem = static_cast<Ra::Engine::TimeSystem*>( system ) )           \
+        {                                                                                 \
+            timeSystem->X;                                                                \
+            mainApp->askForUpdate();                                                      \
+        }                                                                                 \
+    }
+
+#define TIME_SYSTEM_DO_AND_CONTINUOUS_UPDATE( X, on )                                     \
+    {                                                                                     \
+        auto system = Ra::Engine::RadiumEngine::getInstance()->getSystem( "TimeSystem" ); \
+        if ( auto timeSystem = static_cast<Ra::Engine::TimeSystem*>( system ) )           \
+        {                                                                                 \
+            timeSystem->X;                                                                \
+            mainApp->setContinuousUpdate( on );                                           \
+        }                                                                                 \
+    }
+
+void MainWindow::on_actionPlay_triggered( bool checked ) {
+    TIME_SYSTEM_DO_AND_CONTINUOUS_UPDATE( play( checked ), checked );
+}
+
+void MainWindow::on_actionStop_triggered() {
+     TIME_SYSTEM_DO_AND_UPDATE( reset() );
+    actionPlay->setChecked( false );
+}
+
+void MainWindow::on_actionStep_triggered() {
+    TIME_SYSTEM_DO_AND_UPDATE( step() );
+}
+#undef TIME_SYSTEM_DO_AND_UPDATE
+#undef TIME_SYSTEM_DO_AND_CONTINUOUS_UPDATE
 
 void MainWindow::onItemAdded( const Engine::ItemEntry& ent ) {
     m_itemModel->addItem( ent );

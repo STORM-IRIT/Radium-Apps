@@ -36,6 +36,6 @@ target_link_libraries (${PROJECT_NAME} PUBLIC
 target_include_directories( ${PROJECT_NAME} PRIVATE ${CMAKE_CURRENT_SOURCE_DIR} )
 
 # call the installation configuration (defined in RadiumConfig.cmake)
-configure_radium_app_install(
-        NAME ${PROJECT_NAME}
+configure_radium_app(
+    NAME ${PROJECT_NAME}
 )

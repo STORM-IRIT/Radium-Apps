@@ -81,9 +81,9 @@ target_link_libraries (${PROJECT_NAME} PUBLIC
     Radium::IO
     ${Qt5_LIBRARIES})
 
-configure_radium_app_install(
-        NAME ${PROJECT_NAME}
-        USE_PLUGINS
+configure_radium_app(
+    NAME ${PROJECT_NAME}
+    USE_PLUGINS
 )
 
 # radium_cotire( ${app_target} )

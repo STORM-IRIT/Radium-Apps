@@ -2,6 +2,8 @@
 #include <MainApplication.hpp>
 
 #include <Core/Asset/FileLoaderInterface.hpp>
+#include <Engine/Component/SkeletonComponent.hpp>
+#include <Engine/Component/SkinningComponent.hpp>
 #include <Engine/Entity/Entity.hpp>
 #include <Engine/Managers/EntityManager/EntityManager.hpp>
 #include <Engine/Managers/SignalManager/SignalManager.hpp>
@@ -13,6 +15,8 @@
 #include <Engine/Renderer/RenderTechnique/RenderTechnique.hpp>
 #include <Engine/Renderer/RenderTechnique/ShaderConfigFactory.hpp>
 #include <Engine/Renderer/Renderers/ForwardRenderer.hpp>
+#include <Engine/Renderer/Texture/TextureManager.hpp>
+#include <Engine/System/SkeletonBasedAnimationSystem.hpp>
 #include <Engine/System/TimedSystem.hpp>
 #include <GuiBase/TreeModel/EntityTreeModel.hpp>
 #include <GuiBase/Utils/KeyMappingManager.hpp>
@@ -347,6 +351,19 @@ void MainWindow::onSelectionChanged( const QItemSelection& /*selected*/,
                                      const QItemSelection& /*deselected*/ ) {
     m_currentShaderBox->setEnabled( false );
 
+    m_currentSkeleton = nullptr;
+    tabWidget->setEnabled( false );
+
+    m_currentSkinning = nullptr;
+    m_skinningMethod->setEnabled( false );
+    m_showWeights->setEnabled( false );
+    m_weightsType->setEnabled( false );
+    actionLBS->setEnabled( false );
+    actionDQS->setEnabled( false );
+    actionCoR->setEnabled( false );
+    actionSTBSLBS->setEnabled( false );
+    actionSTBSDQS->setEnabled( false );
+
     if ( m_selectionManager->hasSelection() )
     {
         const ItemEntry& ent = m_selectionManager->currentItem();
@@ -372,6 +389,69 @@ void MainWindow::onSelectionChanged( const QItemSelection& /*selected*/,
         }
         else
             m_currentShaderBox->setCurrentText( "" );
+
+        // select skeleton and skinning components
+        if ( ent.m_entity )
+        {
+            std::vector<Ra::Engine::Component*> comps;
+            auto system = Ra::Engine::RadiumEngine::getInstance()->getSystem( "TimeSystem" );
+            if ( auto timeSystem = static_cast<Ra::Engine::TimeSystem*>( system ) )
+            {
+                auto system = timeSystem->getSystems().front().get();
+                if ( auto animSystem =
+                        static_cast<Ra::Engine::SkeletonBasedAnimationSystem*>( system ) )
+                {
+                    comps = animSystem->getEntityComponents( ent.m_entity );
+                    mainApp->askForUpdate();
+                }
+            }
+            if ( comps.size() != 0 )
+            {
+                for ( auto& comp : comps )
+                {
+                    if ( comp->getName().compare( 0, 3, "AC_" ) == 0 ) {
+                        m_currentSkeleton = static_cast<Ra::Engine::SkeletonComponent*>( comp );
+                        tabWidget->setEnabled( true );
+                        actionXray->setChecked( m_currentSkeleton->isXray() );
+                        m_timeStep->setCurrentIndex( ( m_currentSkeleton->usesAnimationTimeStep() ? 1 : 0 ) );
+                        m_speed->setValue( double( m_currentSkeleton->getSpeed() ) );
+                        m_autoRepeat->setChecked( m_currentSkeleton->isAutoRepeat() );
+                        m_pingPong->setChecked( m_currentSkeleton->isPingPong() );
+                        m_xray->setChecked( m_currentSkeleton->isXray() );
+                        m_showSkeleton->setChecked( m_currentSkeleton->isShowingSkeleton() );
+                        m_currentAnimation->blockSignals( true );
+                        m_currentAnimation->clear();
+                        for ( size_t i = 0; i < m_currentSkeleton->getAnimationCount(); ++i )
+                        {
+                            m_currentAnimation->addItem( "#" + QString::number( i ) );
+                        }
+                        m_currentAnimation->setCurrentIndex( int( m_currentSkeleton->getAnimationId() ) );
+                        m_currentAnimation->blockSignals( false );
+                    }
+                    if ( comp->getName().compare( 0, 4, "SkC_" ) == 0 ) {
+                        m_currentSkinning = static_cast<Ra::Engine::SkinningComponent*>( comp );
+                        // deal with bone selection for weights display
+                        using BoneMap = std::map<Ra::Core::Utils::Index, uint>;
+                        auto CM       = Ra::Engine::ComponentMessenger::getInstance();
+                        auto BM       = *CM->getterCallback<BoneMap>(
+                            ent.m_entity, m_currentSkinning->m_skelName )();
+                        auto b_it     = BM.find( ent.m_roIndex );
+                        if ( b_it != BM.end() )
+                        { m_currentSkinning->setWeightBone( b_it->second ); }
+                        m_skinningMethod->setEnabled( true );
+                        m_showWeights->setEnabled( true );
+                        m_weightsType->setEnabled( true );
+                        actionLBS->setEnabled( true );
+                        actionDQS->setEnabled( true );
+                        actionCoR->setEnabled( true );
+                        actionSTBSLBS->setEnabled( true );
+                        actionSTBSDQS->setEnabled( true );
+                        m_skinningMethod->setCurrentIndex( int( m_currentSkinning->getSkinningType() ) );
+                        on_m_skinningMethod_currentIndexChanged( int( m_currentSkinning->getSkinningType() ) );
+                    }
+                }
+            }
+        }
     }
     else
     {
@@ -578,6 +658,19 @@ void MainWindow::onRendererReady() {
 
 void MainWindow::onFrameComplete() {
     tab_edition->updateValues();
+
+    auto system = Ra::Engine::RadiumEngine::getInstance()->getSystem( "TimeSystem" );
+    if ( auto timeSystem = static_cast<Ra::Engine::TimeSystem*>( system ) )
+    {
+        auto system = timeSystem->getSystems().front().get();
+        if ( auto animSystem =
+             static_cast<Ra::Engine::SkeletonBasedAnimationSystem*>( system ) )
+        {
+            m_animTimeDisplay->setText( QString::number( double(
+                animSystem->getAnimationTime( m_selectionManager->currentItem() ) ) ) );
+            mainApp->askForUpdate();
+        }
+    }
 }
 
 void MainWindow::addRenderer( const std::string& name, std::shared_ptr<Engine::Renderer> e ) {
@@ -615,7 +708,7 @@ void MainWindow::on_actionPlay_triggered( bool checked ) {
 }
 
 void MainWindow::on_actionStop_triggered() {
-     TIME_SYSTEM_DO_AND_UPDATE( reset() );
+    TIME_SYSTEM_DO_AND_UPDATE( reset() );
     actionPlay->setChecked( false );
 }
 
@@ -624,6 +717,317 @@ void MainWindow::on_actionStep_triggered() {
 }
 #undef TIME_SYSTEM_DO_AND_UPDATE
 #undef TIME_SYSTEM_DO_AND_CONTINUOUS_UPDATE
+
+#define ANIM_SYSTEM_DO_AND_UPDATE(X) \
+{                                                                                     \
+    auto system = Ra::Engine::RadiumEngine::getInstance()->getSystem( "TimeSystem" ); \
+    if ( auto timeSystem = static_cast<Ra::Engine::TimeSystem*>( system ) )           \
+    {                                                                                 \
+        auto system = timeSystem->getSystems().front().get();                         \
+        if ( auto animSystem =                                                        \
+                static_cast<Ra::Engine::SkeletonBasedAnimationSystem*>( system ) )    \
+        {                                                                             \
+            animSystem->X;                                                            \
+            mainApp->askForUpdate();                                                  \
+        }                                                                             \
+    }                                                                                 \
+}
+
+void MainWindow::on_actionXray_triggered( bool checked ) {
+    m_xray->setChecked( checked );
+    on_m_xray_clicked( checked );
+}
+
+void MainWindow::on_actionLBS_triggered() {
+    m_skinningMethod->setCurrentIndex( 0 );
+    actionLBS->setChecked( true );
+    actionDQS->setChecked( false );
+    actionCoR->setChecked( false );
+    actionSTBSLBS->setChecked( false );
+    actionSTBSDQS->setChecked( false );
+    mainApp->askForUpdate();
+}
+
+void MainWindow::on_actionDQS_triggered() {
+    m_skinningMethod->setCurrentIndex( 1 );
+    actionLBS->setChecked( false );
+    actionDQS->setChecked( true );
+    actionCoR->setChecked( false );
+    actionSTBSLBS->setChecked( false );
+    actionSTBSDQS->setChecked( false );
+    mainApp->askForUpdate();
+}
+
+void MainWindow::on_actionCoR_triggered() {
+    m_skinningMethod->setCurrentIndex( 2 );
+    actionLBS->setChecked( false );
+    actionDQS->setChecked( false );
+    actionCoR->setChecked( true );
+    actionSTBSLBS->setChecked( false );
+    actionSTBSDQS->setChecked( false );
+    mainApp->askForUpdate();
+}
+
+void MainWindow::on_actionSTBSLBS_triggered() {
+    m_skinningMethod->setCurrentIndex( 3 );
+    actionLBS->setChecked( false );
+    actionDQS->setChecked( false );
+    actionCoR->setChecked( false );
+    actionSTBSLBS->setChecked( true );
+    actionSTBSDQS->setChecked( false );
+    mainApp->askForUpdate();
+}
+
+void MainWindow::on_actionSTBSDQS_triggered() {
+    m_skinningMethod->setCurrentIndex( 4 );
+    actionLBS->setChecked( false );
+    actionDQS->setChecked( false );
+    actionCoR->setChecked( false );
+    actionSTBSLBS->setChecked( false );
+    actionSTBSDQS->setChecked( true );
+    mainApp->askForUpdate();
+}
+
+void MainWindow::on_m_timeStep_currentIndexChanged( int index ) {
+    if ( m_applyToAll->isChecked() )
+    { ANIM_SYSTEM_DO_AND_UPDATE( toggleAnimationTimeStep( ( index == 0 ) ) ); }
+    else if ( m_currentSkeleton )
+    {
+        m_currentSkeleton->toggleAnimationTimeStep( index == 0 );
+    }
+}
+
+void MainWindow::on_m_speed_valueChanged( double arg1 ) {
+    if ( m_applyToAll->isChecked() )
+    { ANIM_SYSTEM_DO_AND_UPDATE( setAnimationSpeed( Scalar( arg1 ) ) ); }
+    else if ( m_currentSkeleton )
+    {
+        m_currentSkeleton->setSpeed( Scalar( arg1 ) );
+    }
+}
+
+void MainWindow::on_m_pingPong_toggled( bool checked ) {
+    if ( m_applyToAll->isChecked() )
+    { ANIM_SYSTEM_DO_AND_UPDATE( pingPong( checked ) ); }
+    else if ( m_currentSkeleton )
+    {
+        m_currentSkeleton->pingPong( checked );
+    }
+}
+
+void MainWindow::on_m_autoRepeat_toggled( bool checked ) {
+    if ( m_applyToAll->isChecked() )
+    { ANIM_SYSTEM_DO_AND_UPDATE( autoRepeat( checked ) ); }
+    else if ( m_currentSkeleton )
+    {
+        m_currentSkeleton->autoRepeat( checked );
+    }
+}
+
+void MainWindow::on_m_currentAnimation_currentIndexChanged( int index ) {
+    ANIM_SYSTEM_DO_AND_UPDATE( useAnim( m_currentSkeleton, uint( index ) ) );
+}
+
+void MainWindow::on_m_newAnim_clicked() {
+    CORE_ASSERT( m_currentSkeleton, "Null SkeletonComponent." );
+    const uint num = uint( m_currentAnimation->count() );
+    m_currentAnimation->blockSignals( true );
+    m_currentAnimation->addItem( "#" + QString::number( num ) );
+    m_currentAnimation->setCurrentIndex( num );
+    m_currentAnimation->blockSignals( false );
+    m_currentSkeleton->addNewAnimation();
+    ANIM_SYSTEM_DO_AND_UPDATE( useAnim( m_currentSkeleton, num ) );
+}
+
+void MainWindow::on_m_removeAnim_clicked() {
+    if ( m_currentAnimation->count() == 1 ) { return; }
+
+    CORE_ASSERT( m_currentSkeleton, "Null SkeletonComponent." );
+    const int removeIndex = m_currentAnimation->currentIndex();
+    m_currentAnimation->blockSignals( true );
+    m_currentAnimation->removeItem( removeIndex );
+    m_currentSkeleton->removeAnimation( uint( removeIndex ) );
+    m_currentAnimation->setCurrentIndex( int( m_currentSkeleton->getAnimationId() ) );
+    m_currentAnimation->blockSignals( false );
+    mainApp->askForUpdate();
+}
+
+void MainWindow::on_m_loadAnim_clicked() {
+    // TODO
+//    QSettings settings;
+//    QString path = settings.value( "Animation::path", QDir::homePath() ).toString();
+//    path         = QFileDialog::getOpenFileName( nullptr, "Load Animation", path, "*.rdma" );
+//    if ( path.size() == 0 ) { return; }
+//    settings.setValue( "Animation::path", path );
+//    m_animFile->setText( path.split( '/' ).last() );
+
+//    const int num = m_currentAnimation->count();
+//    m_currentAnimation->blockSignals( true );
+//    m_currentAnimation->addItem( "#" + QString::number( num ) );
+//    m_currentAnimation->setCurrentIndex( num );
+//    m_currentAnimation->blockSignals( false );
+
+//    auto& anim = m_currentSkeleton->addNewAnimation();
+//    std::ifstream file( path.toStdString(), std::ios::binary );
+//    // Todo: deal with anim timestep when used
+//    size_t n;
+//    Scalar t;
+//    Ra::Core::Transform T;
+//    for ( auto& bAnim : anim )
+//    {
+//        file.read( reinterpret_cast<char*>( &n ), sizeof( n ) );
+//        for ( size_t i = 0; i < n; ++i )
+//        {
+//            file.read( reinterpret_cast<char*>( &t ), sizeof( t ) );
+//            file.read( reinterpret_cast<char*>( &T ), sizeof( T ) );
+//            bAnim.insertKeyFrame( t, T );
+//        }
+//        bAnim.removeKeyFrame( -1_ra );
+//    }
+//    emit useAnim( m_currentSkeleton, num );
+//    mainApp->askForUpdate();
+}
+
+void MainWindow::on_m_saveAnim_clicked() {
+    // TODO
+//    QSettings settings;
+//    QString path = settings.value( "Animation::path", QDir::homePath() ).toString();
+//    path         = QFileDialog::getSaveFileName( nullptr, "Load Animation", path, "*.rdma" );
+//    if ( path.size() == 0 ) { return; }
+//    settings.setValue( "Animation::path", path );
+//    m_animFile->setText( path.split( '/' ).last() );
+
+//    const auto& anim = m_currentSkeleton->getAnimation( m_currentSkeleton->getAnimationId() );
+//    std::ofstream file( path.toStdString(), std::ios::trunc | std::ios::binary );
+//    // Todo: deal with anim timestep when used
+//    size_t n;
+//    for ( const auto& bAnim : anim )
+//    {
+//        n = bAnim.size();
+//        file.write( reinterpret_cast<const char*>( &n ), sizeof( n ) );
+//        for ( const auto t : bAnim.getTimeSchedule() )
+//        {
+//            file.write( reinterpret_cast<const char*>( &t ), sizeof( t ) );
+//            auto kf = bAnim.at( t );
+//            file.write( reinterpret_cast<const char*>( &kf ), sizeof( kf ) );
+//        }
+//    }
+}
+
+void MainWindow::on_m_xray_clicked( bool checked ) {
+    if ( m_applyToAll->isChecked() )
+    { ANIM_SYSTEM_DO_AND_UPDATE( setXray( checked ) ); }
+    else if ( m_currentSkeleton )
+    {
+        m_currentSkeleton->setXray( checked );
+    }
+}
+
+void MainWindow::on_m_showSkeleton_toggled( bool checked ) {
+    if ( m_applyToAll->isChecked() )
+    { ANIM_SYSTEM_DO_AND_UPDATE( toggleSkeleton( checked ) ); }
+    else if ( m_currentSkeleton )
+    {
+        m_currentSkeleton->toggleSkeleton( checked );
+    }
+}
+#undef ANIM_SYSTEM_DO_AND_UPDATE
+
+void MainWindow::on_m_skinningMethod_currentIndexChanged( int newType ) {
+    CORE_ASSERT( m_currentSkinning, "Invalid Skinning Type" );
+    CORE_ASSERT( newType >= 0 && newType < 5, "Invalid Skinning Type" );
+    m_currentSkinning->setSkinningType(
+        Ra::Engine::SkinningComponent::SkinningType( newType ) );
+    switch ( newType )
+    {
+    case 0:
+    {
+        actionLBS->setChecked( true );
+        actionDQS->setChecked( false );
+        actionCoR->setChecked( false );
+        actionSTBSLBS->setChecked( false );
+        actionSTBSDQS->setChecked( false );
+        actionLBS->setIcon( QIcon( ":/Resources/Icons/LB_on.png" ) );
+        actionDQS->setIcon( QIcon( ":/Resources/Icons/DQ.png" ) );
+        actionCoR->setIcon( QIcon( ":/Resources/Icons/CoR.png" ) );
+        actionSTBSLBS->setIcon( QIcon( ":/Resources/Icons/STBSLB.png" ) );
+        actionSTBSDQS->setIcon( QIcon( ":/Resources/Icons/STBSDQ.png" ) );
+        break;
+    }
+    case 1:
+    {
+        actionLBS->setChecked( false );
+        actionDQS->setChecked( true );
+        actionCoR->setChecked( false );
+        actionSTBSLBS->setChecked( false );
+        actionSTBSDQS->setChecked( false );
+        actionLBS->setIcon( QIcon( ":/Resources/Icons/LB.png" ) );
+        actionDQS->setIcon( QIcon( ":/Resources/Icons/DQ_on.png" ) );
+        actionCoR->setIcon( QIcon( ":/Resources/Icons/CoR.png" ) );
+        actionSTBSLBS->setIcon( QIcon( ":/Resources/Icons/STBSLB.png" ) );
+        actionSTBSDQS->setIcon( QIcon( ":/Resources/Icons/STBSDQ.png" ) );
+        break;
+    }
+    case 2:
+    {
+        actionLBS->setChecked( false );
+        actionDQS->setChecked( false );
+        actionCoR->setChecked( true );
+        actionSTBSLBS->setChecked( false );
+        actionSTBSDQS->setChecked( false );
+        actionLBS->setIcon( QIcon( ":/Resources/Icons/LB.png" ) );
+        actionDQS->setIcon( QIcon( ":/Resources/Icons/DQ.png" ) );
+        actionCoR->setIcon( QIcon( ":/Resources/Icons/CoR_on.png" ) );
+        actionSTBSLBS->setIcon( QIcon( ":/Resources/Icons/STBSLB.png" ) );
+        actionSTBSDQS->setIcon( QIcon( ":/Resources/Icons/STBSDQ.png" ) );
+        break;
+    }
+    case 3:
+    {
+        actionLBS->setChecked( false );
+        actionDQS->setChecked( false );
+        actionCoR->setChecked( false );
+        actionSTBSLBS->setChecked( true );
+        actionSTBSDQS->setChecked( false );
+        actionLBS->setIcon( QIcon( ":/Resources/Icons/LB.png" ) );
+        actionDQS->setIcon( QIcon( ":/Resources/Icons/DQ.png" ) );
+        actionCoR->setIcon( QIcon( ":/Resources/Icons/CoR.png" ) );
+        actionSTBSLBS->setIcon( QIcon( ":/Resources/Icons/STBSLB_on.png" ) );
+        actionSTBSDQS->setIcon( QIcon( ":/Resources/Icons/STBSDQ.png" ) );
+        break;
+    }
+    case 4:
+    {
+        actionLBS->setChecked( false );
+        actionDQS->setChecked( false );
+        actionCoR->setChecked( false );
+        actionSTBSLBS->setChecked( false );
+        actionSTBSDQS->setChecked( true );
+        actionLBS->setIcon( QIcon( ":/Resources/Icons/LB.png" ) );
+        actionDQS->setIcon( QIcon( ":/Resources/Icons/DQ.png" ) );
+        actionCoR->setIcon( QIcon( ":/Resources/Icons/CoR.png" ) );
+        actionSTBSLBS->setIcon( QIcon( ":/Resources/Icons/STBSLB.png" ) );
+        actionSTBSDQS->setIcon( QIcon( ":/Resources/Icons/STBSDQ_on.png" ) );
+        break;
+    }
+    default:
+    { break; }
+    }
+    mainApp->askForUpdate();
+}
+
+void MainWindow::on_m_showWeights_toggled( bool checked ) {
+    CORE_ASSERT( m_currentSkinning, "Null SkinningComponent." );
+    // TODO: deal with the texture initialisation before re-activating this code
+//    m_currentSkinning->showWeights( checked );
+//    mainApp->askForUpdate();
+}
+
+void MainWindow::on_m_weightsType_currentIndexChanged( int newType ) {
+    CORE_ASSERT( m_currentSkinning, "Null SkinningComponent." );
+    m_currentSkinning->showWeightsType( newType );
+    mainApp->askForUpdate();
+}
 
 void MainWindow::onItemAdded( const Engine::ItemEntry& ent ) {
     m_itemModel->addItem( ent );
@@ -761,6 +1165,21 @@ void MainWindow::onGLInitialized() {
     // set default renderer once OpenGL is configured
     std::shared_ptr<Engine::Renderer> e( new Engine::ForwardRenderer() );
     addRenderer( "Forward Renderer", e );
+
+    // TODO: this should be done on Ra::Engine side, but where?
+//    QImage influenceImage( ":/Resources/Textures/Influence0.png" );
+//    auto img = influenceImage.convertToFormat( QImage::Format_RGB888 );
+//    Ra::Engine::TextureParameters texData;
+//    texData.wrapS     = GL_CLAMP_TO_EDGE;
+//    texData.wrapT     = GL_CLAMP_TO_EDGE;
+//    texData.minFilter = GL_NEAREST;
+//    texData.magFilter = GL_NEAREST;
+//    texData.width     = size_t( img.width() );
+//    texData.height    = size_t( img.height() );
+//    texData.format    = GL_RGB;
+//    texData.texels    = img.bits();
+//    texData.name      = ":/Resources/Textures/Influence0.png";
+//    Ra::Engine::TextureManager::getInstance()->getOrLoadTexture( texData );
 }
 
 void MainWindow::addPluginPath() {

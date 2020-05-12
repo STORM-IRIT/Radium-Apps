@@ -17,5 +17,16 @@
         <file>Icons/step_on.png</file>
         <file>Icons/stop_off.png</file>
         <file>Icons/stop_on.png</file>
+        <file>Icons/xray.png</file>
+        <file>Icons/DQ.png</file>
+        <file>Icons/DQ_on.png</file>
+        <file>Icons/CoR.png</file>
+        <file>Icons/CoR_on.png</file>
+        <file>Icons/LB.png</file>
+        <file>Icons/LB_on.png</file>
+        <file>Icons/STBSDQ.png</file>
+        <file>Icons/STBSDQ_on.png</file>
+        <file>Icons/STBSLB.png</file>
+        <file>Icons/STBSLB_on.png</file>
     </qresource>
 </RCC>

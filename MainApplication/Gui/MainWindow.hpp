@@ -17,6 +17,8 @@
 namespace Ra {
 namespace Engine {
 class Entity;
+class SkeletonComponent;
+class SkinningComponent;
 }
 } // namespace Ra
 
@@ -112,6 +114,9 @@ class MainWindow : public Ra::GuiBase::MainWindowInterface, private Ui::MainWind
     void selectedItem( const Engine::ItemEntry& entry );
 
   private slots:
+    /// \name Time events
+    /// \{
+
     /// Slot for the user requesting to play/pause time through the time actions.
     void on_actionPlay_triggered( bool checked );
 
@@ -120,6 +125,71 @@ class MainWindow : public Ra::GuiBase::MainWindowInterface, private Ui::MainWind
 
     /// Slot for the user requesting to reset time.
     void on_actionStop_triggered();
+    /// \}
+
+    /// \name Skeleton-based Animation
+    /// \{
+
+    /// Slot for the user requesting x-ray animation skeletons (through the toolbar).
+    void on_actionXray_triggered( bool checked );
+
+    /// Slot for the user requesting to use LBS skinning.
+    void on_actionLBS_triggered();
+
+    /// Slot for the user requesting to use DQS skinning.
+    void on_actionDQS_triggered();
+
+    /// Slot for the user requesting to use CoR skinning.
+    void on_actionCoR_triggered();
+
+    /// Slot for the user requesting to use STBS-LBS skinning.
+    void on_actionSTBSLBS_triggered();
+
+    /// Slot for the user requesting to use STBS-DQS skinning.
+    void on_actionSTBSDQS_triggered();
+
+    /// Slot for the user changing the skeleton animation timestep.
+    void on_m_timeStep_currentIndexChanged( int index );
+
+    /// Slot for the user changing the animation speed.
+    void on_m_speed_valueChanged( double arg1 );
+
+    /// Slot for the user toggling the animation ping-pong mode.
+    void on_m_pingPong_toggled( bool checked );
+
+    /// Slot for the user toggling the animation auto-repeat mode.
+    void on_m_autoRepeat_toggled( bool checked );
+
+    /// Slot for the user changing the skeleton animation.
+    void on_m_currentAnimation_currentIndexChanged( int index );
+
+    /// Slot for the user adding a new skeleton animation.
+    void on_m_newAnim_clicked();
+
+    /// Slot for the user removing a skeleton animation.
+    void on_m_removeAnim_clicked();
+
+    /// Slot for the user wanting to load a skeleton animation from a file.
+    void on_m_loadAnim_clicked();
+
+    /// Slot for the user wanting to save the current skeleton animation to a file.
+    void on_m_saveAnim_clicked();
+
+    /// Slot for the user requesting x-ray animation skeletons (through the toolbox).
+    void on_m_xray_clicked( bool checked );
+
+    /// Slot for the user requesting to show the skeleton.
+    void on_m_showSkeleton_toggled( bool checked );
+
+    /// Slot for the user changing the skinning method.
+    void on_m_skinningMethod_currentIndexChanged( int index );
+
+    /// Slot for the user requesting to display per-bone skinning weights.
+    void on_m_showWeights_toggled( bool checked );
+
+    /// Slot for the user selecting the kind of displayed skinning weights.
+    void on_m_weightsType_currentIndexChanged( int index );
+    /// \}
 
   private:
     /// Connect qt signals and slots. Called once by the constructor.
@@ -198,6 +268,12 @@ class MainWindow : public Ra::GuiBase::MainWindowInterface, private Ui::MainWind
 
     /// viewer widget
     Ra::Gui::Viewer* m_viewer{nullptr};
+
+    /// Selected SkeletonComponent.
+    Ra::Engine::SkeletonComponent* m_currentSkeleton{nullptr};
+
+    /// Selected SkinningComponent.
+    Ra::Engine::SkinningComponent* m_currentSkinning{nullptr};
 };
 
 } // namespace Gui

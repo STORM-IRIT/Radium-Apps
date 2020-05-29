@@ -56,7 +56,7 @@ class MainWindow : public Ra::GuiBase::MainWindowInterface, private Ui::MainWind
     /// Update the ui from the plugins loaded.
     void updateUi( Plugins::RadiumPluginInterface* plugin ) override;
 
-    /// Update the UI ( most importantly gizmos ) to the modifications of the engine/
+    /// Update the UI ( most importantly gizmos ) to the modifications of the engine
     void onFrameComplete() override;
 
     /// Add a renderer in the application: UI, viewer.

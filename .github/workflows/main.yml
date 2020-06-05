@@ -13,7 +13,7 @@ jobs:
        uses: peter-evans/repository-dispatch@v1
        with:
           token: ${{ secrets.REPO_ACCESS_TOKEN }}
-          repository: STORM-IRIT/Radium-Apps
+          repository: STORM-IRIT/Radium-Releases
           event-type: code-update-event
           client-payload: '{"ref": "${{ github.ref }}", "sha": "${{ github.sha }}"}'
 

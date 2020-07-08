@@ -13,6 +13,7 @@
 #include <Engine/Renderer/RenderTechnique/RenderTechnique.hpp>
 #include <Engine/Renderer/RenderTechnique/ShaderConfigFactory.hpp>
 #include <Engine/Renderer/Renderers/ForwardRenderer.hpp>
+#include <GuiBase/Timeline/Timeline.h>
 #include <GuiBase/TreeModel/EntityTreeModel.hpp>
 #include <GuiBase/Utils/KeyMappingManager.hpp>
 #include <GuiBase/Utils/qt_utils.hpp>
@@ -63,6 +64,11 @@ MainWindow::MainWindow( QWidget* parent ) : MainWindowInterface( parent ) {
 
     setCentralWidget( viewerwidget );
 
+    // Register the timeline
+    m_timeline = new Ra::GuiBase::Timeline( this );
+    m_timeline->onChangeEnd( Ra::Engine::RadiumEngine::getInstance()->getEndTime() );
+    dockWidget_2->setWidget( m_timeline );
+    
     setWindowIcon( QPixmap( ":/Resources/Icons/RadiumIcon.png" ) );
     setWindowTitle( QString( "Radium Engine" ) );
 
@@ -134,6 +140,24 @@ void MainWindow::createConnections() {
         actionReload_configuration, &QAction::triggered, this, &MainWindow::reloadConfiguration );
     connect(
         actionLoad_configuration_file, &QAction::triggered, this, &MainWindow::loadConfiguration );
+
+    // Timeline setup
+    connect( m_timeline, &Ra::GuiBase::Timeline::playClicked, this, &MainWindow::timelinePlay );
+    connect(
+        m_timeline, &Ra::GuiBase::Timeline::cursorChanged, this, &MainWindow::timelineGoTo );
+    connect( m_timeline,
+             &Ra::GuiBase::Timeline::startChanged,
+             this,
+             &MainWindow::timelineStartChanged );
+    connect(
+        m_timeline, &Ra::GuiBase::Timeline::endChanged, this, &MainWindow::timelineEndChanged );
+    connect( m_timeline,
+             &Ra::GuiBase::Timeline::setPingPong,
+             this,
+             &MainWindow::timelineSetPingPong );
+    connect( m_timeline, &Ra::GuiBase::Timeline::keyFrameChanged, [=]( Scalar ) {
+        mainApp->askForUpdate();
+    } );
 
     // Loading setup.
     connect( this, &MainWindow::fileLoading, mainApp, &Ra::GuiBase::BaseApplication::loadFile );
@@ -317,6 +341,10 @@ GuiBase::SelectionManager* MainWindow::getSelectionManager() {
     return m_selectionManager;
 }
 
+GuiBase::Timeline* MainWindow::getTimeline() {
+    return m_timeline;
+}
+
 void Gui::MainWindow::toggleCirclePicking( bool on ) {
     centralWidget()->setMouseTracking( on );
 }
@@ -370,7 +398,8 @@ void MainWindow::onSelectionChanged( const QItemSelection& /*selected*/,
             // to change the material type
         }
         else
-            m_currentShaderBox->setCurrentText( "" );
+            { m_currentShaderBox->setCurrentText( "" ); }
+        m_timeline->selectionChanged( ent );
     }
     else
     {
@@ -379,6 +408,7 @@ void MainWindow::onSelectionChanged( const QItemSelection& /*selected*/,
         m_selectedItemName->setText( "" );
         m_editRenderObjectButton->setEnabled( false );
         m_materialEditor->hide();
+        m_timeline->selectionChanged( ItemEntry() );
     }
 }
 
@@ -577,6 +607,14 @@ void MainWindow::onRendererReady() {
 
 void MainWindow::onFrameComplete() {
     tab_edition->updateValues();
+    // update timeline only if time changed, to allow manipulation of keyframed objects
+    auto engine = Ra::Engine::RadiumEngine::getInstance();
+    if ( !Ra::Core::Math::areApproxEqual( m_timeline->getTime(), engine->getTime() ) )
+    {
+        m_lockTimeSystem = true;
+        m_timeline->onChangeCursor( engine->getTime() );
+        m_lockTimeSystem = false;
+    }
 }
 
 void MainWindow::addRenderer( const std::string& name, std::shared_ptr<Engine::Renderer> e ) {
@@ -603,6 +641,42 @@ void MainWindow::on_actionStop_triggered() {
 void MainWindow::on_actionStep_triggered() {
     Ra::Engine::RadiumEngine::getInstance()->step();
     mainApp->askForUpdate();
+}
+
+void MainWindow::timelinePlay( bool play ) {
+    actionPlay->setChecked( play );
+    if ( !m_lockTimeSystem ) { 
+        Ra::Engine::RadiumEngine::getInstance()->play( play );
+        mainApp->setContinuousUpdate( play );
+    }
+}
+
+void MainWindow::timelineGoTo( double t ) {
+    if ( !m_lockTimeSystem ) {
+        Ra::Engine::RadiumEngine::getInstance()->setTime( Scalar( t ) );
+        mainApp->askForUpdate();
+    }
+}
+
+void MainWindow::timelineStartChanged( double t ) {
+    if ( !m_lockTimeSystem ) { 
+        Ra::Engine::RadiumEngine::getInstance()->setStartTime( Scalar( t ) ); 
+    	mainApp->askForUpdate();
+    }
+}
+
+void MainWindow::timelineEndChanged( double t ) {
+    if ( !m_lockTimeSystem ) { 
+        Ra::Engine::RadiumEngine::getInstance()->setEndTime( Scalar( t ) ); 
+        mainApp->askForUpdate();
+    }
+}
+
+void MainWindow::timelineSetPingPong( bool status ) {
+    if ( !m_lockTimeSystem ) { 
+        Ra::Engine::RadiumEngine::getInstance()->setForwardBackward( status );
+        mainApp->askForUpdate();
+    }
 }
 
 void MainWindow::onItemAdded( const Engine::ItemEntry& ent ) {
@@ -768,4 +842,3 @@ void Ra::Gui::MainWindow::on_m_currentColorButton_clicked() {
     QColor c = QColorDialog::getColor( currentColor, this, "Renderer background color" );
     if ( c.isValid() ) { updateBackgroundColor( c ); }
 }
-

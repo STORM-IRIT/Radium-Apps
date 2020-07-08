@@ -398,7 +398,7 @@ void MainWindow::onSelectionChanged( const QItemSelection& /*selected*/,
             // to change the material type
         }
         else
-            m_currentShaderBox->setCurrentText( "" );
+            { m_currentShaderBox->setCurrentText( "" ); }
         m_timeline->selectionChanged( ent );
     }
     else
@@ -842,4 +842,3 @@ void Ra::Gui::MainWindow::on_m_currentColorButton_clicked() {
     QColor c = QColorDialog::getColor( currentColor, this, "Renderer background color" );
     if ( c.isValid() ) { updateBackgroundColor( c ); }
 }
-

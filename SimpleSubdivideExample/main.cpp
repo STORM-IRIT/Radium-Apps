@@ -93,79 +93,22 @@ int main( int argc, char* argv[] ) {
         Ra::Core::Geometry::TriangleMesh mesh;
         Ra::IO::OBJFileManager obj;
 
+        // Load geometry as triangle
         if ( a.inputFilename.empty() ) { mesh = Ra::Core::Geometry::makeBox(); }
-        else
-        { obj.load( a.inputFilename, mesh ); }
+        else                           { obj.load( a.inputFilename, mesh ); }
 
-        LOG( logINFO ) << "in Mesh";
-        for ( auto v : mesh.vertices() )
-        {
-            LOG( logINFO ) << v.transpose();
-        }
-
-        LOG( logINFO ) << "in Normals";
-        for ( auto v : mesh.normals() )
-        {
-            LOG( logINFO ) << v.transpose();
-        }
-
-#ifdef TEST_ATTRIBUTES_SUBDIV
-        float i           = 0;
-        auto test_handle2 = mesh.addAttrib<Ra::Core::Vector4>( "test vec4" );
-        mesh.getAttrib( test_handle2 ).resize( mesh.vertices().size() );
-        for ( auto& v : mesh.getAttrib( test_handle2 ).data() )
-        {
-            v = Ra::Core::Vector4( i, i, i, i );
-            i += 1.f;
-        }
-
-        auto test_handle = mesh.addAttrib<Ra::Core::Vector3>( "test vec3" );
-        mesh.getAttrib( test_handle ).resize( mesh.vertices().size() );
-
-        for ( auto& v : mesh.getAttrib( test_handle ).data() )
-        {
-            v = Ra::Core::Vector3( i, i, i );
-            LOG( logINFO ) << v.transpose();
-            i += 1.f;
-        }
-#endif
-
+        // Create topological structure
         Ra::Core::Geometry::TopologicalMesh topologicalMesh( mesh );
 
+        // Create OpenMesh subdivider, and process topological structure
         a.subdivider->attach( topologicalMesh );
         ( *a.subdivider )( a.iteration );
         a.subdivider->detach();
 
+        // Convert processed topological structure to triangle mesh
         mesh = topologicalMesh.toTriangleMesh();
 
-        LOG( logINFO ) << "out Mesh";
-        for ( auto v : mesh.vertices() )
-        {
-            LOG( logINFO ) << v.transpose();
-        }
-
-        LOG( logINFO ) << "out Normals";
-        for ( auto v : mesh.normals() )
-        {
-            LOG( logINFO ) << v.transpose();
-        }
-
-#ifdef TEST_ATTRIBUTES_SUBDIV
-        LOG( logINFO ) << "out Vec3";
-        auto out_handle = mesh.getAttribHandle<Ra::Core::Vector3>( "test vec3" );
-        for ( auto v : mesh.getAttrib( out_handle ).data() )
-        {
-            LOG( logINFO ) << v.transpose();
-        }
-
-        LOG( logINFO ) << "out Vec4";
-        auto out_handle2 = mesh.getAttribHandle<Ra::Core::Vector4>( "test vec4" );
-        for ( auto v : mesh.getAttrib( out_handle2 ).data() )
-        {
-            LOG( logINFO ) << v.transpose();
-        }
-#endif
-
+        // Save triangle mesh to obj file
         obj.save( a.outputFilename, mesh );
     }
     return 0;

@@ -10,7 +10,6 @@ if (CMAKE_INSTALL_PREFIX_INITIALIZED_TO_DEFAULT)
     set(CMAKE_INSTALL_PREFIX_INITIALIZED_TO_DEFAULT False)
 endif()
 
-
 add_subdirectory(MainApplication)
 add_subdirectory(HelloRadium)
-add_subdirectory(SimpleSubdivideExample)
+add_subdirectory(CLISubdivider)

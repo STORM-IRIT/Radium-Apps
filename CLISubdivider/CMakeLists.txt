@@ -1,7 +1,7 @@
 cmake_minimum_required(VERSION 3.6)
 #-------------------------------------------------------------------------------
 # exampleApp executables setup
-project(SimpleSubdivide)
+project(Radium-CLI-Subdivider)
 
 find_package( Radium REQUIRED Core IO)
 

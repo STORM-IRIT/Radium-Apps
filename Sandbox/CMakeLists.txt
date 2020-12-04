@@ -1,4 +1,4 @@
-# Build MainApplication
+# Build Radium Sandbox
 cmake_minimum_required(VERSION 3.8)
 if(${CMAKE_MAJOR_VERSION}.${CMAKE_MINOR_VERSION} VERSION_GREATER "3.9")
     cmake_policy(SET CMP0071 NEW)
@@ -6,7 +6,7 @@ endif()
 
 #-------------------------------------------------------------------------------
 # exampleApp executables setup
-project(main-app)
+project(Radium-Sandbox)
 # Set default install location to installed-<Compiler_ID> folder in build dir
 # we do not want to install to /usr by default
 if (CMAKE_INSTALL_PREFIX_INITIALIZED_TO_DEFAULT)

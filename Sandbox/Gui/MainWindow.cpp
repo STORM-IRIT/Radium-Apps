@@ -68,7 +68,7 @@ MainWindow::MainWindow( QWidget* parent ) : MainWindowInterface( parent ) {
     dockWidget_2->setWidget( m_timeline );
     
     setWindowIcon( QPixmap( ":/Resources/Icons/RadiumIcon.png" ) );
-    setWindowTitle( QString( "Radium Engine" ) );
+    setWindowTitle( QString( "Radium Engine Sandbox" ) );
 
     QStringList headers;
     headers << tr( "Entities -> Components" );

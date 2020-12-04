@@ -2,17 +2,38 @@
 Radium is a research 3D Engine for rendering, animation and processing.
 It is developed and maintained by the [STORM research group](https://www.irit.fr/STORM/site/).
 
-This repository holds the front-end applications (GUI, command line) based on Radium Libraries.
-To compile this repository, you first need to compile the [Radium libraries](https://github.com/STORM-IRIT/Radium-Engine).
+This repository holds front-end applications (GUI, command line) based on Radium Libraries
+ - Sandbox: Graphical frontend of the Radium Engine. This application aims at demonstrating the capabilities of the Radium Libraries. It can be extended using Radium plugins.
+ - CLISubdivider: Example of command line application. Loads obj files and run subdivision algorithms implemented with OpenMesh.
+ 
+To get more details about each application, checkout the Readme files in each application directory.
 
-## How to write your own application
-Custom applications can be easily add to Radium ecosystem.
+# How to get these applications
+## Pre-compiled binaries
+Pre-compiled binaries can be downloaded from https://github.com/STORM-IRIT/Radium-Releases/releases/.
+
+The downloaded archive contains:
+ - Radium libraries
+ - Radium example applications (this repository)
+
+## Compilation instructions
+To compile this repository, you first need to compile and install the [Radium libraries](https://github.com/STORM-IRIT/Radium-Engine).
+Then, configure this project using cmake. 
+You need to tell cmake where to find the installed Radium package by setting the `Radium_DIR` variable to the right location (see more details in Radium Engine documentation: https://storm-irit.github.io/Radium-Engine/).
+
+
+# How to write your own application
+This repository also demonstrate how to write applications and extend Radium ecosystem.
 Radium provides a set of tools simplifying the deployment of such applications,
 which among other things take care of the portability and relocatability of the
 binaries.
 
-To use these tools, you need to follow theses instructions.
-### Setting a CMakeLists.txt to compile and install an application
+Other minimal application examples are available at https://github.com/STORM-IRIT/Radium-Engine/tree/master/tests/ExampleApps.
+
+In order to write your own application, you need to follow theses instructions.
+
+
+## Setting a CMakeLists.txt to compile and install an application
 To compile and execute an application, either in the build tree
 or after installation, the Radium environment must be configured,
 compiled and installed beforehand.
@@ -54,14 +75,15 @@ target_link_libraries (${PROJECT_NAME} PUBLIC
     ... )
 
 # call the installation configuration (defined in RadiumConfig.cmake)
-configure_radium_app_install(
+configure_radium_app(
         NAME ${PROJECT_NAME}
+        [USE_PLUGINS]   # enable plugin support
         [RESOURCES list of resources directory]
 )
 ```
 
 ### Configure the application
-A Radium application could not be compiled in its source tree.
+Radium does not support in-source builds (it is bad practice anyway).
 You then must first create a buid directory that will be the root of the buildtree.
 
     mkdir build

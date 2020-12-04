@@ -10,5 +10,5 @@ if (CMAKE_INSTALL_PREFIX_INITIALIZED_TO_DEFAULT)
     set(CMAKE_INSTALL_PREFIX_INITIALIZED_TO_DEFAULT False)
 endif()
 
-add_subdirectory(MainApplication)
+add_subdirectory(Sandbox)
 add_subdirectory(CLISubdivider)

@@ -58,27 +58,35 @@ const std::string fragment{
     "{\n"
     "    out_color =  vec4(in_pos,1.)*aScalarUniform;\n"
     "}\n"};
+// Fragment shader source code
+const std::string fragment2{
+    "layout (location = 0) out vec4 out_color;\n"
+     "uniform vec4 aColorUniform;\n"
+     "uniform float aScalarUniform;\n"
+    "void main(void)\n"
+    "{\n"
+    "    out_color =  aColorUniform*aScalarUniform;\n"
+    "}\n"};
 
 
 void
-initQuad(Ra::GuiBase::BaseApplication &app)
+initQuad(Ra::GuiBase::BaseApplication &app, 
+        Scalar size,
+        std::shared_ptr<Ra::Engine::ShaderParameterProvider> parameterProvider,
+        std::string vert, std::string frag)
 {
 
     //! [Creating the quad]
-    auto cube = Ra::Core::Geometry::makeZNormalQuad( {1_ra, 1_ra} );
+    auto cube = Ra::Core::Geometry::makeZNormalQuad( {size, size} );
 
     //! [Create the engine entity for the cube]
     auto e = app.m_engine->getEntityManager()->createEntity( "Quad Entity" );
-
-    //! [Create Parameter provider for the shader]
-    auto paramProvider = std::make_shared<MyParameterProvider>();
-    paramProvider->setOrComputeTheParameterValues();
 
     //! [Create a geometry component]
     auto c = new Ra::Engine::TriangleMeshComponent( "Quad Mesh", e, std::move( cube ), nullptr );
 
     //! [Create a CustomShaderComponent]
-    auto c2 = new CustomShaderComponent( "Quad Mesh Shader", e, c, paramProvider, vertex, fragment);
+    auto c2 = new CustomShaderComponent( "Quad Mesh Shader", e, c, parameterProvider, vert, frag);
 
     //! [Register the entity/component association to the geometry system ]
     auto system = app.m_engine->getSystem( "GeometrySystem" );
@@ -96,7 +104,13 @@ initQuad(Ra::GuiBase::BaseApplication &app)
 int main( int argc, char* argv[] ) {
     Ra::GuiBase::BaseApplication app( argc, argv, Ra::GuiBase::SimpleWindowFactory {} );
 
-    initQuad( app );
+
+    //! [Create Parameter provider for the shader]
+    auto paramProvider = std::make_shared<MyParameterProvider>();
+    paramProvider->setOrComputeTheParameterValues();
+
+    initQuad( app, 0.5, paramProvider, vertex, fragment );
+    initQuad( app, 1., paramProvider, vertex, fragment2 );
 
     return app.exec();
 }

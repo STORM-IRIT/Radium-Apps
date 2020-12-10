@@ -32,6 +32,7 @@ set(app_sources
     )
 
 set(app_headers
+    CameraManipulator.hpp
    )
 
 set(app_uis

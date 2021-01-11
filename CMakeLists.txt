@@ -3,7 +3,7 @@ project(Radium-apps)
 
 # Set default build type to Release
 if(NOT CMAKE_BUILD_TYPE)
-  messageInfo("No CMAKE_BUILD_TYPE, using default CMAKE_BUILD_TYPE=Release")
+  message("No CMAKE_BUILD_TYPE, using default CMAKE_BUILD_TYPE=Release")
   set(CMAKE_BUILD_TYPE "Release")
 endif()
 

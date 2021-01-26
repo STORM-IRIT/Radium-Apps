@@ -36,7 +36,7 @@ set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 
 # Graphical apps
 add_subdirectory(Sandbox)
-add_subdirectory(Painter)
+add_subdirectory(ShaderEditor)
 
 # CLI apps
 add_subdirectory(CLISubdivider)

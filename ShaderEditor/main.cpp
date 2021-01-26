@@ -19,6 +19,7 @@
 
 // Qt
 #include <QTimer>
+#include <QDockWidget>
 
 /**
  * Demonstrate the usage of RawShaderMaterial functionalities
@@ -128,6 +129,10 @@ int main( int argc, char* argv[] ) {
     Ra::Engine::RawShaderMaterial::registerMaterial();
 
     auto ro = initQuad( app );
+
+    QDockWidget* dock = new QDockWidget("Shaders editor");
+    // dock->setCentralWidget( new EditorWidget() );
+    app.m_mainWindow->addDockWidget(Qt::LeftDockWidgetArea, dock);
 
     auto viewer = app.m_mainWindow->getViewer();
     viewer->setCameraManipulator(

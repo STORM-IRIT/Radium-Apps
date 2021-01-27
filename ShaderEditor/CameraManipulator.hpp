@@ -2,7 +2,7 @@
 
 #include <GuiBase/Viewer/TrackballCameraManipulator.hpp>
 
-class CameraManipulator2D : public Ra::Gui::TrackballCameraManipulator 
+class CameraManipulator2D : public Ra::Gui::TrackballCameraManipulator
 {
 public:
     /// Default constructor
@@ -24,7 +24,8 @@ public:
     m_lastMouseY = event->pos().y();
 
     auto action = Ra::Gui::KeyMappingManager::getInstance()->getAction(
-        m_keyMappingContext, buttons, modifiers, key, false );
+        Ra::Gui::KeyMappingManageable<TrackballCameraManipulator>::
+        getContext(), buttons, modifiers, key, false );
 
 
     if ( action == TRACKBALLCAMERA_PAN )

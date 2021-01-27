@@ -16,6 +16,9 @@
 #include <GuiBase/Viewer/Viewer.hpp>
 
 #include "CameraManipulator.hpp"
+#include "ShaderEditorWidget.hpp"
+
+#include <string>
 
 // Qt
 #include <QTimer>
@@ -131,7 +134,7 @@ int main( int argc, char* argv[] ) {
     auto ro = initQuad( app );
 
     QDockWidget* dock = new QDockWidget("Shaders editor");
-    // dock->setCentralWidget( new EditorWidget() );
+    dock->setWidget( new ShaderEditorWidget(dock) );
     app.m_mainWindow->addDockWidget(Qt::LeftDockWidgetArea, dock);
 
     auto viewer = app.m_mainWindow->getViewer();

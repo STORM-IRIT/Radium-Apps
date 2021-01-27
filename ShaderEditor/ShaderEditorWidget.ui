@@ -15,7 +15,7 @@
   </property>
   <layout class="QVBoxLayout" name="verticalLayout">
    <item>
-    <widget class="QGroupBox" name="_vertexShaderGroup">
+    <widget class="QGroupBox" name="_vertShaderGroup">
      <property name="title">
       <string>Edit Vertex Shader</string>
      </property>
@@ -24,13 +24,13 @@
      </property>
      <layout class="QGridLayout" name="gridLayout">
       <item row="0" column="0">
-       <widget class="QTextEdit" name="_vertexShaderrEdit"/>
+       <widget class="QTextEdit" name="_vertShaderEdit"/>
       </item>
      </layout>
     </widget>
    </item>
    <item>
-    <widget class="QGroupBox" name="_fragmentShaderGroup">
+    <widget class="QGroupBox" name="_fragShaderGroup">
      <property name="title">
       <string>Edit Fragment Shader</string>
      </property>
@@ -39,7 +39,7 @@
      </property>
      <layout class="QGridLayout" name="gridLayout_2">
       <item row="0" column="0">
-       <widget class="QTextEdit" name="_fragmentShaderEdit"/>
+       <widget class="QTextEdit" name="_fragShaderEdit"/>
       </item>
      </layout>
     </widget>

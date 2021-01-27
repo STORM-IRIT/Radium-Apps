@@ -35,6 +35,7 @@ set(app_sources
 set(app_headers
     CameraManipulator.hpp
     ShaderEditorWidget.hpp
+    MyParameterProvider.hpp
    )
 
 set(app_uis

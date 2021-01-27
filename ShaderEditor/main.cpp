@@ -17,6 +17,7 @@
 
 #include "CameraManipulator.hpp"
 #include "ShaderEditorWidget.hpp"
+#include "MyParameterProvider.hpp"
 
 #include <string>
 
@@ -49,46 +50,14 @@ const std::string _fragmentShaderSource {
     "    out_color =  ( 1 + cos( 20 * ( in_pos.x + aScalarUniform ) ) ) * 0.5 * aColorUniform;\n"
     "}\n"};
 
-// Fragment shader source code
-const std::string _fragmentShaderSource2 {
-    "layout (location = 0) in  vec3 in_pos;\n"
-    "layout (location = 0) out vec4 out_color;\n"
-    "uniform vec4 aColorUniform;\n"
-    "uniform float aScalarUniform;\n"
-    "void main(void)\n"
-    "{\n"
-    "    out_color =  ( 1 + sin( 20 * ( in_pos.y + aScalarUniform ) ) ) * 0.5 * aColorUniform;\n"
-    "}\n"};
 
-const std::vector<std::pair<Ra::Engine::ShaderType, std::string>> _config1 {
+
+const ShaderConfigType defaultConfig {
     {Ra::Engine::ShaderType::ShaderType_VERTEX, _vertexShaderSource},
     {Ra::Engine::ShaderType::ShaderType_FRAGMENT, _fragmentShaderSource}};
 
-const std::vector<std::pair<Ra::Engine::ShaderType, std::string>> _config2 {
-    {Ra::Engine::ShaderType::ShaderType_VERTEX, _vertexShaderSource},
-    {Ra::Engine::ShaderType::ShaderType_FRAGMENT, _fragmentShaderSource2}};
+auto paramProvider = std::make_shared<MyParameterProvider>();
 
-class MyParameterProvider : public Ra::Engine::ShaderParameterProvider
-{
-  public:
-    MyParameterProvider() {}
-    ~MyParameterProvider() {}
-    void updateGL() override {
-        // Method called before drawing each frame in Renderer::updateRenderObjectsInternal.
-        // The name of the parameter corresponds to the shader's uniform name.
-        m_renderParameters.addParameter( "aColorUniform", m_colorParameter );
-        m_renderParameters.addParameter( "aScalarUniform", m_scalarParameter );
-    }
-    void setOrComputeTheParameterValues() {
-        // client side computation of the parameters, e.g.
-        m_colorParameter  = Ra::Core::Utils::Color::Red();
-        m_scalarParameter = .5_ra;
-    }
-
-  private:
-    Ra::Core::Utils::Color m_colorParameter {Ra::Core::Utils::Color::Green()};
-    Scalar m_scalarParameter {1};
-};
 
 /**
  * Generate a quad with a ShaderMaterial attached
@@ -103,11 +72,10 @@ std::shared_ptr<Ra::Engine::RenderObject> initQuad( Ra::GuiBase::BaseApplication
     auto e = app.m_engine->getEntityManager()->createEntity( "Quad Entity" );
 
     //! [Create Parameter provider for the shader]
-    auto paramProvider = std::make_shared<MyParameterProvider>();
     paramProvider->setOrComputeTheParameterValues();
 
     //! [Create the shader material]
-    Ra::Core::Asset::RawShaderMaterialData mat {"Quad Material", _config1, paramProvider};
+    Ra::Core::Asset::RawShaderMaterialData mat {"Quad Material", defaultConfig, paramProvider};
 
     //! [Create a geometry component using the custom material]
     auto c = new Ra::Engine::TriangleMeshComponent( "Quad Mesh", e, std::move( quad ), &mat );
@@ -133,13 +101,13 @@ int main( int argc, char* argv[] ) {
 
     auto ro = initQuad( app );
 
-    QDockWidget* dock = new QDockWidget("Shaders editor");
-    dock->setWidget( new ShaderEditorWidget(dock) );
-    app.m_mainWindow->addDockWidget(Qt::LeftDockWidgetArea, dock);
-
     auto viewer = app.m_mainWindow->getViewer();
     viewer->setCameraManipulator(
         new CameraManipulator2D( *( viewer->getCameraManipulator() ) ) );
+
+    QDockWidget* dock = new QDockWidget("Shaders editor");
+    dock->setWidget( new ShaderEditorWidget(defaultConfig[0].second, defaultConfig[1].second, ro, viewer->getRenderer(), paramProvider, dock) );
+    app.m_mainWindow->addDockWidget(Qt::LeftDockWidgetArea, dock);
 
     return app.exec();
 }

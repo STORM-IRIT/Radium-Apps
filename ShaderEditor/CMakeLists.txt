@@ -29,13 +29,16 @@ set(CMAKE_AUTORCC ON)
 
 set(app_sources
         main.cpp
+        ShaderEditorWidget.cpp
     )
 
 set(app_headers
     CameraManipulator.hpp
+    ShaderEditorWidget.hpp
    )
 
 set(app_uis
+    ShaderEditorWidget.ui
    )
 
 qt5_wrap_ui(app_uis_moc ${app_uis})

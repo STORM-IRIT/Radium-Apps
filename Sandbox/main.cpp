@@ -1,14 +1,14 @@
 #include <MainApplication.hpp>
 
-#include <GuiBase/Utils/KeyMappingManager.hpp>
+#include <Gui/Utils/KeyMappingManager.hpp>
 
 #include <Gui/MainWindow.hpp>
 
-class MainWindowFactory : public Ra::GuiBase::BaseApplication::WindowFactory
+class MainWindowFactory : public Ra::Gui::BaseApplication::WindowFactory
 {
   public:
-    using Ra::GuiBase::BaseApplication::WindowFactory::WindowFactory;
-    Ra::GuiBase::MainWindowInterface* createMainWindow() const override {
+    using Ra::Gui::BaseApplication::WindowFactory::WindowFactory;
+    Ra::Gui::MainWindowInterface* createMainWindow() const override {
         return new Ra::Gui::MainWindow();
     }
 };

@@ -1,11 +1,11 @@
 #pragma once
 
-#include <Engine/Renderer/RenderTechnique/RenderParameters.hpp>
+#include <Engine/Data/RenderParameters.hpp>
 
 
-using ShaderConfigType = std::vector<std::pair<Ra::Engine::ShaderType, std::string>> ;
+using ShaderConfigType = std::vector<std::pair<Ra::Engine::Data::ShaderType, std::string>> ;
 
-class MyParameterProvider : public Ra::Engine::ShaderParameterProvider
+class MyParameterProvider : public Ra::Engine::Data::ShaderParameterProvider
 {
   public:
     MyParameterProvider() {}

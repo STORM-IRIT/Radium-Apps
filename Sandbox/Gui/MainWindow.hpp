@@ -1,11 +1,11 @@
 #ifndef RADIUMENGINE_MAINWINDOW_HPP
 #define RADIUMENGINE_MAINWINDOW_HPP
 
-#include <GuiBase/MainWindowInterface.hpp>
-#include <GuiBase/RaGuiBase.hpp>
-#include <GuiBase/SelectionManager/SelectionManager.hpp>
-#include <GuiBase/TimerData/FrameTimerData.hpp>
-#include <GuiBase/TreeModel/EntityTreeModel.hpp>
+#include <Gui/MainWindowInterface.hpp>
+#include <Gui/RaGui.hpp>
+#include <Gui/SelectionManager/SelectionManager.hpp>
+#include <Gui/TimerData/FrameTimerData.hpp>
+#include <Gui/TreeModel/EntityTreeModel.hpp>
 #include <Gui/MaterialEditor.hpp>
 
 #include "ui_MainWindow.h"
@@ -25,9 +25,9 @@ namespace Gui {
 class EntityTreeModel;
 class Viewer;
 } // namespace Gui
-namespace GuiBase {
+namespace Gui {
 class Timeline;
-} // namespace GuiBase
+} // namespace Gui
 } // namespace Ra
 
 namespace Ra {
@@ -41,7 +41,7 @@ namespace Gui {
 
 /// This class manages most of the GUI of the application :
 /// top menu, side toolbar and side dock.
-class MainWindow : public Ra::GuiBase::MainWindowInterface, private Ui::MainWindow
+class MainWindow : public Ra::Gui::MainWindowInterface, private Ui::MainWindow
 {
     Q_OBJECT
 
@@ -54,10 +54,10 @@ class MainWindow : public Ra::GuiBase::MainWindowInterface, private Ui::MainWind
     Viewer* getViewer() override;
 
     /// Access the selection manager.
-    GuiBase::SelectionManager* getSelectionManager() override;
+    Gui::SelectionManager* getSelectionManager() override;
 
     /// Access the timeline.
-    GuiBase::Timeline* getTimeline() override;
+    Gui::Timeline* getTimeline() override;
 
     /// Update the ui from the plugins loaded.
     void updateUi( Plugins::RadiumPluginInterface* plugin ) override;
@@ -66,13 +66,13 @@ class MainWindow : public Ra::GuiBase::MainWindowInterface, private Ui::MainWind
     void onFrameComplete() override;
 
     /// Add a renderer in the application: UI, viewer.
-    void addRenderer( const std::string& name, std::shared_ptr<Engine::Renderer> e ) override;
+    void addRenderer( const std::string& name, std::shared_ptr<Engine::Rendering::Renderer> e ) override;
 
   public slots:
     /// Callback to rebuild the item model when the engine objects change.
-    void onItemAdded( const Engine::ItemEntry& ent );
+    void onItemAdded( const Engine::Scene::ItemEntry& ent );
 
-    void onItemRemoved( const Engine::ItemEntry& ent );
+    void onItemRemoved( const Engine::Scene::ItemEntry& ent );
 
     // Frame timers ui slots
     void onUpdateFramestats( const std::vector<FrameTimerData>& stats );
@@ -115,7 +115,7 @@ class MainWindow : public Ra::GuiBase::MainWindowInterface, private Ui::MainWind
     void framescountForStatsChanged( int count );
 
     /// Emitted when a new item is selected. An invalid entry is sent when no item is selected.
-    void selectedItem( const Engine::ItemEntry& entry );
+    void selectedItem( const Engine::Scene::ItemEntry& entry );
 
   private:
     /// Connect qt signals and slots. Called once by the constructor.
@@ -147,7 +147,7 @@ class MainWindow : public Ra::GuiBase::MainWindowInterface, private Ui::MainWind
     void onCurrentRenderChangedInUI();
 
     /// Slot for the picking results from the viewer.
-    void handlePicking( const Ra::Engine::Renderer::PickingResult& pickingResult );
+    void handlePicking( const Ra::Engine::Rendering::Renderer::PickingResult& pickingResult );
 
     // Slot to init renderers once gl is ready
     void onGLInitialized();
@@ -209,10 +209,10 @@ class MainWindow : public Ra::GuiBase::MainWindowInterface, private Ui::MainWind
 
   private:
     /// Stores the internal model of engine objects for selection and visibility.
-    GuiBase::ItemModel* m_itemModel{nullptr};
+    Gui::ItemModel* m_itemModel{nullptr};
 
     /// Stores and manages the current selection.
-    GuiBase::SelectionManager* m_selectionManager{nullptr};
+    Gui::SelectionManager* m_selectionManager{nullptr};
 
     /// Widget to allow material edition.
     std::unique_ptr<MaterialEditor> m_materialEditor{nullptr};
@@ -221,7 +221,7 @@ class MainWindow : public Ra::GuiBase::MainWindowInterface, private Ui::MainWind
     Ra::Gui::Viewer* m_viewer{nullptr};
 
     /// Timeline gui
-    Ra::GuiBase::Timeline* m_timeline{nullptr};
+    Ra::Gui::Timeline* m_timeline{nullptr};
 
     /// Guard TimeSystem against issue with Timeline signals.
     bool m_lockTimeSystem{false};

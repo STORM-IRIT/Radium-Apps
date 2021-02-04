@@ -1,10 +1,10 @@
 #include <Gui/MaterialEditor.hpp>
 
 #include <Engine/RadiumEngine.hpp>
-#include <Engine/Renderer/Material/BlinnPhongMaterial.hpp>
-#include <Engine/Renderer/RenderObject/RenderObject.hpp>
-#include <Engine/Renderer/RenderObject/RenderObjectManager.hpp>
-#include <Engine/Renderer/RenderTechnique/RenderTechnique.hpp>
+#include <Engine/Data/BlinnPhongMaterial.hpp>
+#include <Engine/Rendering/RenderObject.hpp>
+#include <Engine/Rendering/RenderObjectManager.hpp>
+#include <Engine/Rendering/RenderTechnique.hpp>
 
 #include <QCloseEvent>
 
@@ -149,8 +149,8 @@ void MaterialEditor::changeRenderObject( Core::Utils::Index roIdx ) {
             auto genericMaterial = m_renderObject->getMaterial();
             if ( genericMaterial->getMaterialName() == "BlinnPhong" )
             {
-                m_blinnphongmaterial = const_cast<Ra::Engine::BlinnPhongMaterial*>(
-                    dynamic_cast<const Ra::Engine::BlinnPhongMaterial*>( genericMaterial.get() ) );
+                m_blinnphongmaterial = const_cast<Ra::Engine::Data::BlinnPhongMaterial*>(
+                    dynamic_cast<const Ra::Engine::Data::BlinnPhongMaterial*>( genericMaterial.get() ) );
                 updateBlinnPhongViz();
                 m_BlinnPhongGroup->show();
             }

@@ -2,29 +2,29 @@
 #include <MainApplication.hpp>
 
 #include <Core/Asset/FileLoaderInterface.hpp>
-#include <Engine/Entity/Entity.hpp>
-#include <Engine/Managers/EntityManager/EntityManager.hpp>
-#include <Engine/Managers/SignalManager/SignalManager.hpp>
-#include <Engine/Renderer/Material/Material.hpp>
-#include <Engine/Renderer/Material/MaterialConverters.hpp>
-#include <Engine/Renderer/Mesh/Mesh.hpp>
-#include <Engine/Renderer/RenderObject/RenderObject.hpp>
-#include <Engine/Renderer/RenderObject/RenderObjectManager.hpp>
-#include <Engine/Renderer/Renderers/ForwardRenderer.hpp>
-#include <GuiBase/Timeline/Timeline.hpp>
-#include <GuiBase/TreeModel/EntityTreeModel.hpp>
-#include <GuiBase/Utils/KeyMappingManager.hpp>
-#include <GuiBase/Utils/qt_utils.hpp>
-#include <GuiBase/Viewer/FlightCameraManipulator.hpp>
-#include <GuiBase/Viewer/Gizmo/GizmoManager.hpp>
-#include <GuiBase/Viewer/TrackballCameraManipulator.hpp>
-#include <GuiBase/Viewer/Viewer.hpp>
+#include <Engine/Scene/Entity.hpp>
+#include <Engine/Scene/EntityManager.hpp>
+#include <Engine/Scene/SignalManager.hpp>
+#include <Engine/Data/Material.hpp>
+#include <Engine/Data/MaterialConverters.hpp>
+#include <Engine/Data/Mesh.hpp>
+#include <Engine/Rendering/RenderObject.hpp>
+#include <Engine/Rendering/RenderObjectManager.hpp>
+#include <Engine/Rendering/ForwardRenderer.hpp>
+#include <Gui/Timeline/Timeline.hpp>
+#include <Gui/TreeModel/EntityTreeModel.hpp>
+#include <Gui/Utils/KeyMappingManager.hpp>
+#include <Gui/Utils/qt_utils.hpp>
+#include <Gui/Viewer/FlightCameraManipulator.hpp>
+#include <Gui/Viewer/Gizmo/GizmoManager.hpp>
+#include <Gui/Viewer/TrackballCameraManipulator.hpp>
+#include <Gui/Viewer/Viewer.hpp>
 #include <IO/deprecated/OBJFileManager.hpp>
 #include <PluginBase/RadiumPluginInterface.hpp>
 
 #include <Core/Utils/StringUtils.hpp>
-#include <Engine/Managers/SystemDisplay/SystemDisplay.hpp>
-#include <Engine/Renderer/Camera/Camera.hpp>
+#include <Engine/Scene/SystemDisplay.hpp>
+#include <Engine/Scene/Camera.hpp>
 
 #include <QColorDialog>
 #include <QComboBox>
@@ -33,7 +33,7 @@
 #include <QSettings>
 #include <QToolButton>
 
-using Ra::Engine::ItemEntry;
+using Ra::Engine::Scene::ItemEntry;
 
 namespace Ra {
 namespace Gui {
@@ -63,7 +63,7 @@ MainWindow::MainWindow( QWidget* parent ) : MainWindowInterface( parent ) {
     setCentralWidget( viewerwidget );
 
     // Register the timeline
-    m_timeline = new Ra::GuiBase::Timeline( this );
+    m_timeline = new Ra::Gui::Timeline( this );
     m_timeline->onChangeEnd( Ra::Engine::RadiumEngine::getInstance()->getEndTime() );
     dockWidget_2->setWidget( m_timeline );
     
@@ -72,10 +72,10 @@ MainWindow::MainWindow( QWidget* parent ) : MainWindowInterface( parent ) {
 
     QStringList headers;
     headers << tr( "Entities -> Components" );
-    m_itemModel = new GuiBase::ItemModel( mainApp->getEngine(), this );
+    m_itemModel = new Gui::ItemModel( mainApp->getEngine(), this );
     m_entitiesTreeView->setModel( m_itemModel );
     m_materialEditor   = std::make_unique<MaterialEditor>();
-    m_selectionManager = new GuiBase::SelectionManager( m_itemModel, this );
+    m_selectionManager = new Gui::SelectionManager( m_itemModel, this );
     m_entitiesTreeView->setSelectionModel( m_selectionManager );
 
     createConnections();
@@ -124,7 +124,7 @@ void MainWindow::createConnections() {
     connect( actionToggle_Local_Global,
              &QAction::toggled,
              mainApp,
-             &Ra::GuiBase::BaseApplication::askForUpdate );
+             &Ra::Gui::BaseApplication::askForUpdate );
 
     connect( actionGizmoOff, &QAction::triggered, this, &MainWindow::gizmoShowNone );
     connect( actionGizmoTranslate, &QAction::triggered, this, &MainWindow::gizmoShowTranslate );
@@ -140,25 +140,25 @@ void MainWindow::createConnections() {
         actionLoad_configuration_file, &QAction::triggered, this, &MainWindow::loadConfiguration );
 
     // Timeline setup
-    connect( m_timeline, &Ra::GuiBase::Timeline::playClicked, this, &MainWindow::timelinePlay );
+    connect( m_timeline, &Ra::Gui::Timeline::playClicked, this, &MainWindow::timelinePlay );
     connect(
-        m_timeline, &Ra::GuiBase::Timeline::cursorChanged, this, &MainWindow::timelineGoTo );
+        m_timeline, &Ra::Gui::Timeline::cursorChanged, this, &MainWindow::timelineGoTo );
     connect( m_timeline,
-             &Ra::GuiBase::Timeline::startChanged,
+             &Ra::Gui::Timeline::startChanged,
              this,
              &MainWindow::timelineStartChanged );
     connect(
-        m_timeline, &Ra::GuiBase::Timeline::endChanged, this, &MainWindow::timelineEndChanged );
+        m_timeline, &Ra::Gui::Timeline::endChanged, this, &MainWindow::timelineEndChanged );
     connect( m_timeline,
-             &Ra::GuiBase::Timeline::setPingPong,
+             &Ra::Gui::Timeline::setPingPong,
              this,
              &MainWindow::timelineSetPingPong );
-    connect( m_timeline, &Ra::GuiBase::Timeline::keyFrameChanged, [=]( Scalar ) {
+    connect( m_timeline, &Ra::Gui::Timeline::keyFrameChanged, [=]( Scalar ) {
         mainApp->askForUpdate();
     } );
 
     // Loading setup.
-    connect( this, &MainWindow::fileLoading, mainApp, &Ra::GuiBase::BaseApplication::loadFile );
+    connect( this, &MainWindow::fileLoading, mainApp, &Ra::Gui::BaseApplication::loadFile );
 
     // Connect picking results (TODO Val : use events to dispatch picking directly)
     connect( m_viewer, &Viewer::toggleBrushPicking, this, &MainWindow::toggleCirclePicking );
@@ -168,15 +168,15 @@ void MainWindow::createConnections() {
     connect( m_avgFramesCount,
              static_cast<void ( QSpinBox::* )( int )>( &QSpinBox::valueChanged ),
              mainApp,
-             &Ra::GuiBase::BaseApplication::framesCountForStatsChanged );
+             &Ra::Gui::BaseApplication::framesCountForStatsChanged );
     connect( mainApp,
-             &Ra::GuiBase::BaseApplication::updateFrameStats,
+             &Ra::Gui::BaseApplication::updateFrameStats,
              this,
              &MainWindow::onUpdateFramestats );
 
     // Inform property editors of new selections
     connect( m_selectionManager,
-             &GuiBase::SelectionManager::selectionChanged,
+             &Gui::SelectionManager::selectionChanged,
              this,
              &MainWindow::onSelectionChanged );
     // connect(this, &MainWindow::selectedItem, tab_edition, &TransformEditorWidget::setEditable);
@@ -193,7 +193,7 @@ void MainWindow::createConnections() {
 
     // RO Stuff
     connect(
-        m_itemModel, &GuiBase::ItemModel::visibilityROChanged, this, &MainWindow::setROVisible );
+        m_itemModel, &Gui::ItemModel::visibilityROChanged, this, &MainWindow::setROVisible );
     connect( m_editRenderObjectButton, &QPushButton::clicked, this, &MainWindow::editRO );
     connect( m_exportMeshButton, &QPushButton::clicked, this, &MainWindow::exportCurrentMesh );
     connect( m_removeEntityButton, &QPushButton::clicked, this, &MainWindow::deleteCurrentItem );
@@ -218,27 +218,27 @@ void MainWindow::createConnections() {
     connect( m_realFrameRate,
              &QCheckBox::stateChanged,
              mainApp,
-             &Ra::GuiBase::BaseApplication::setRealFrameRate );
+             &Ra::Gui::BaseApplication::setRealFrameRate );
 
     connect( m_printGraph,
              &QCheckBox::stateChanged,
              mainApp,
-             &Ra::GuiBase::BaseApplication::setRecordGraph );
+             &Ra::Gui::BaseApplication::setRecordGraph );
     connect( m_printTimings,
              &QCheckBox::stateChanged,
              mainApp,
-             &Ra::GuiBase::BaseApplication::setRecordTimings );
+             &Ra::Gui::BaseApplication::setRecordTimings );
 
     // Material editor
     connect( m_materialEditor.get(),
              &MaterialEditor::materialChanged,
              mainApp,
-             &Ra::GuiBase::BaseApplication::askForUpdate );
+             &Ra::Gui::BaseApplication::askForUpdate );
 
     // Connect engine signals to the appropriate callbacks
-    std::function<void( const Engine::ItemEntry& )> add =
+    std::function<void( const Engine::Scene::ItemEntry& )> add =
         std::bind( &MainWindow::onItemAdded, this, std::placeholders::_1 );
-    std::function<void( const Engine::ItemEntry& )> del =
+    std::function<void( const Engine::Scene::ItemEntry& )> del =
         std::bind( &MainWindow::onItemRemoved, this, std::placeholders::_1 );
     mainApp->m_engine->getSignalManager()->m_entityCreatedCallbacks.push_back( add );
     mainApp->m_engine->getSignalManager()->m_entityDestroyedCallbacks.push_back( del );
@@ -335,11 +335,11 @@ Viewer* MainWindow::getViewer() {
     return m_viewer;
 }
 
-GuiBase::SelectionManager* MainWindow::getSelectionManager() {
+Gui::SelectionManager* MainWindow::getSelectionManager() {
     return m_selectionManager;
 }
 
-GuiBase::Timeline* MainWindow::getTimeline() {
+Gui::Timeline* MainWindow::getTimeline() {
     return m_timeline;
 }
 
@@ -347,16 +347,16 @@ void Gui::MainWindow::toggleCirclePicking( bool on ) {
     centralWidget()->setMouseTracking( on );
 }
 
-void MainWindow::handlePicking( const Engine::Renderer::PickingResult& pickingResult ) {
+void MainWindow::handlePicking( const Engine::Rendering::Renderer::PickingResult& pickingResult ) {
     Ra::Core::Utils::Index roIndex( pickingResult.m_roIdx );
     Ra::Engine::RadiumEngine* engine = Ra::Engine::RadiumEngine::getInstance();
     if ( roIndex.isValid() )
     {
         auto ro = engine->getRenderObjectManager()->getRenderObject( roIndex );
-        if ( ro->getType() != Ra::Engine::RenderObjectType::UI )
+        if ( ro->getType() != Ra::Engine::Rendering::RenderObjectType::UI )
         {
-            Ra::Engine::Component* comp = ro->getComponent();
-            Ra::Engine::Entity* ent     = comp->getEntity();
+            Ra::Engine::Scene::Component* comp = ro->getComponent();
+            Ra::Engine::Scene::Entity* ent     = comp->getEntity();
 
             // For now we don't enable group selection.
             m_selectionManager->setCurrentEntry( ItemEntry( ent, comp, roIndex ),
@@ -511,8 +511,8 @@ void MainWindow::changeRenderObjectShader( const QString& shaderName ) {
         if ( name.empty() ) { return; }
 
         const ItemEntry& item = m_selectionManager->currentItem();
-        const Engine::ShaderConfiguration config =
-            Ra::Engine::ShaderConfigurationFactory::getConfiguration( name );
+        const Engine::Data::ShaderConfiguration config =
+            Ra::Engine::Data::ShaderConfigurationFactory::getConfiguration( name );
 
         auto vector_of_ros = getItemROs( mainApp->m_engine.get(), item );
         for ( const auto& ro_index : vector_of_ros )
@@ -615,7 +615,7 @@ void MainWindow::onFrameComplete() {
     }
 }
 
-void MainWindow::addRenderer( const std::string& name, std::shared_ptr<Engine::Renderer> e ) {
+void MainWindow::addRenderer( const std::string& name, std::shared_ptr<Engine::Rendering::Renderer> e ) {
     int id = m_viewer->addRenderer( e );
     CORE_UNUSED( id );
     CORE_ASSERT( id == m_currentRendererCombo->count(), "Inconsistent renderer state" );
@@ -677,11 +677,11 @@ void MainWindow::timelineSetPingPong( bool status ) {
     }
 }
 
-void MainWindow::onItemAdded( const Engine::ItemEntry& ent ) {
+void MainWindow::onItemAdded( const Engine::Scene::ItemEntry& ent ) {
     m_itemModel->addItem( ent );
 }
 
-void MainWindow::onItemRemoved( const Engine::ItemEntry& ent ) {
+void MainWindow::onItemRemoved( const Engine::Scene::ItemEntry& ent ) {
     m_itemModel->removeItem( ent );
 }
 
@@ -700,8 +700,8 @@ void MainWindow::exportCurrentMesh() {
         Ra::IO::OBJFileManager obj;
         auto ro = Engine::RadiumEngine::getInstance()->getRenderObjectManager()->getRenderObject(
             e.m_roIndex );
-        const std::shared_ptr<Engine::Displayable>& displ = ro->getMesh();
-        const Engine::Mesh* mesh = dynamic_cast<Engine::Mesh*>( displ.get() );
+        const std::shared_ptr<Engine::Data::Displayable>& displ = ro->getMesh();
+        const Engine::Data::Mesh* mesh = dynamic_cast<Engine::Data::Mesh*>( displ.get() );
 
         if ( mesh != nullptr && obj.save( filename, mesh->getCoreGeometry() ) )
         {
@@ -766,7 +766,7 @@ void MainWindow::postLoadFile( const std::string& filename ) {
     for ( const auto& ro :
           Engine::RadiumEngine::getInstance()->getRenderObjectManager()->getRenderObjects() )
     {
-        if ( ro->getType() == Engine::RenderObjectType::Geometry )
+        if ( ro->getType() == Engine::Rendering::RenderObjectType::Geometry )
         {
             auto material                 = ro->getMaterial();
             const std::string& shaderName = material->getMaterialName();
@@ -791,10 +791,10 @@ void MainWindow::postLoadFile( const std::string& filename ) {
         {
             LOG( logINFO ) << "Activating camera " << ( *fc )->getName();
 
-            const auto systemEntity = Ra::Engine::SystemEntity::getInstance();
+            const auto systemEntity = Ra::Engine::Scene::SystemEntity::getInstance();
             systemEntity->removeComponent( "CAMERA_DEFAULT" );
 
-            auto camera = static_cast<Ra::Engine::Camera*>( ( *fc ).get() );
+            auto camera = static_cast<Ra::Engine::Scene::Camera*>( ( *fc ).get() );
             m_viewer->getCameraManipulator()->setCamera(
                 camera->duplicate( systemEntity, "CAMERA_DEFAULT" ) );
         }
@@ -811,7 +811,7 @@ void MainWindow::onGLInitialized() {
         this, &MainWindow::selectedItem, m_viewer->getGizmoManager(), &GizmoManager::setEditable );
 
     // set default renderer once OpenGL is configured
-    std::shared_ptr<Engine::Renderer> e( new Engine::ForwardRenderer() );
+    std::shared_ptr<Engine::Rendering::Renderer> e( new Engine::Rendering::ForwardRenderer() );
     addRenderer( "Forward Renderer", e );
 }
 

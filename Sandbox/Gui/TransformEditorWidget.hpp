@@ -4,7 +4,7 @@
 
 #include <Core/Containers/AlignedAllocator.hpp>
 #include <Gui/VectorEditor.hpp>
-#include <GuiBase/TransformEditor/TransformEditor.hpp>
+#include <Gui/TransformEditor/TransformEditor.hpp>
 
 class QLayout;
 
@@ -12,7 +12,7 @@ namespace Ra {
 namespace Gui {
 
 /// The specialized tab to edit the transform of an object.
-class TransformEditorWidget : public QWidget, public GuiBase::TransformEditor
+class TransformEditorWidget : public QWidget, public Gui::TransformEditor
 {
     Q_OBJECT
   public:
@@ -22,7 +22,7 @@ class TransformEditorWidget : public QWidget, public GuiBase::TransformEditor
   public slots:
 
     /// Change the object being edited.
-    void setEditable( const Engine::ItemEntry& ent ) override;
+    void setEditable( const Engine::Scene::ItemEntry& ent ) override;
 
     /// Update the displays from the current state of the editable properties.
     /// This should be called at every frame if the watched object has been updated.

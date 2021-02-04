@@ -60,11 +60,11 @@ class MaterialEditor : public QWidget, private Ui::MaterialEditor
     bool m_visible;
 
     Core::Utils::Index m_roIdx;
-    std::shared_ptr<Engine::RenderObject> m_renderObject;
+    std::shared_ptr<Engine::Rendering::RenderObject> m_renderObject;
 
     /// TODO generalize material editor to others materials
     bool m_usable;
-    Ra::Engine::BlinnPhongMaterial* m_blinnphongmaterial;
+    Ra::Engine::Data::BlinnPhongMaterial* m_blinnphongmaterial;
 
   private:
     enum {

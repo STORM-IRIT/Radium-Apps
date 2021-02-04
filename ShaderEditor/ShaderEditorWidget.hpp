@@ -8,9 +8,13 @@ class ShaderEditorWidget;
 
 namespace Ra{
 namespace Engine{
+namespace Rendering{
     class RenderObject;
     class Renderer;
-    class ShaderParameterProvider;
+}
+namespace Data {
+class ShaderParameterProvider;
+}
 }
 }
 
@@ -38,4 +42,3 @@ private:
     Ra::Engine::Rendering::Renderer * _renderer;
     std::shared_ptr< Ra::Engine::Data::ShaderParameterProvider > _paramProvider;
 };
-

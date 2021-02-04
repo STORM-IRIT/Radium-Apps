@@ -3,12 +3,12 @@
 
 #include "MyParameterProvider.hpp"
 
-#include <Engine/Renderer/Renderer.hpp>
-#include <Engine/Renderer/RenderObject/RenderObjectManager.hpp>
-#include <Engine/Renderer/RenderObject/RenderObject.hpp>
+#include <Engine/Rendering/Renderer.hpp>
+#include <Engine/Rendering/RenderObjectManager.hpp>
+#include <Engine/Rendering/RenderObject.hpp>
 
 // include the custom material definition
-#include <Engine/Renderer/Material/RawShaderMaterial.hpp>
+#include <Engine/Data/RawShaderMaterial.hpp>
 
 #include <QPushButton>
 #include <QString>
@@ -17,9 +17,9 @@
 ShaderEditorWidget::ShaderEditorWidget(
                                 const std::string& v,
                                 const std::string& f,
-                                std::shared_ptr< Ra::Engine::RenderObject > ro,
-                                Ra::Engine::Renderer * renderer,
-                                std::shared_ptr< Ra::Engine::ShaderParameterProvider > paramProvider,
+                                std::shared_ptr< Ra::Engine::Rendering::RenderObject > ro,
+                                Ra::Engine::Rendering::Renderer * renderer,
+                                std::shared_ptr< Ra::Engine::Data::ShaderParameterProvider > paramProvider,
                                 QWidget *parent) :
     QWidget( parent ),
     ui( new Ui::ShaderEditorWidget ),
@@ -43,13 +43,13 @@ ShaderEditorWidget::~ShaderEditorWidget()
 void
 ShaderEditorWidget::updateShadersFromUI() 
 {
-    using ShaderConfigType = std::vector<std::pair<Ra::Engine::ShaderType, std::string>> ;
+    using ShaderConfigType = std::vector<std::pair<Ra::Engine::Data::ShaderType, std::string>> ;
 
     const ShaderConfigType config {
-        {Ra::Engine::ShaderType::ShaderType_VERTEX,   ui->_vertShaderEdit->toPlainText().toStdString()},
-        {Ra::Engine::ShaderType::ShaderType_FRAGMENT, ui->_fragShaderEdit->toPlainText().toStdString()}};
+        {Ra::Engine::Data::ShaderType::ShaderType_VERTEX,   ui->_vertShaderEdit->toPlainText().toStdString()},
+        {Ra::Engine::Data::ShaderType::ShaderType_FRAGMENT, ui->_fragShaderEdit->toPlainText().toStdString()}};
 
-    auto mat           = static_cast<Ra::Engine::RawShaderMaterial*>( _ro->getMaterial().get() );
+    auto mat           = static_cast<Ra::Engine::Data::RawShaderMaterial*>( _ro->getMaterial().get() );
     mat->updateShaders( config, _paramProvider );
     _renderer->buildRenderTechnique( _ro.get() );
 }

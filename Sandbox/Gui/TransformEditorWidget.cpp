@@ -27,7 +27,7 @@ void TransformEditorWidget::onChangedPosition( const Core::Vector3& v, uint id )
     setTransform( m_transform );
 }
 
-void TransformEditorWidget::setEditable( const Engine::ItemEntry& ent ) {
+void TransformEditorWidget::setEditable( const Engine::Scene::ItemEntry& ent ) {
     delete m_translationEditor;
     TransformEditor::setEditable( ent );
     if ( canEdit() )

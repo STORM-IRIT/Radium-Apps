@@ -4,7 +4,7 @@
 #include <QMouseEvent>
 #include <QPalette>
 
-#include <GuiBase/Utils/KeyMappingManager.hpp>
+#include <Gui/Utils/KeyMappingManager.hpp>
 
 namespace Ra {
 namespace Gui {

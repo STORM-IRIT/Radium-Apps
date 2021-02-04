@@ -48,7 +48,7 @@ project(HelloRadium)
 
 # find and configure the Radium environment for the application
 # Note that only the required component of Radium might be fetched.
-find_package( Radium REQUIRED Core Engine GuiBase PluginBase IO)
+find_package( Radium REQUIRED Core Engine Gui PluginBase IO)
 
 #------------------------------------------------------------------------------
 # Application specific configuration
@@ -70,7 +70,7 @@ add_executable(${PROJECT_NAME} [MACOSX_BUNDLE]
 target_link_libraries (${PROJECT_NAME} PUBLIC
     Radium::Core
     Radium::Engine
-    Radium::GuiBase
+    Radium::Gui
     MySuperLibrary
     ... )
 

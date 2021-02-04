@@ -1,6 +1,6 @@
 #pragma once
 
-#include <GuiBase/Viewer/TrackballCameraManipulator.hpp>
+#include <Gui/Viewer/TrackballCameraManipulator.hpp>
 
 class CameraManipulator2D : public Ra::Gui::TrackballCameraManipulator
 {

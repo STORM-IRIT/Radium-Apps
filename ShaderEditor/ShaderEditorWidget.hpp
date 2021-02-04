@@ -23,9 +23,9 @@ class ShaderEditorWidget : public QWidget
 public:
     explicit ShaderEditorWidget(const std::string& v,
                                 const std::string& f,
-                                std::shared_ptr< Ra::Engine::RenderObject > ro,
-                                Ra::Engine::Renderer * renderer,
-                                std::shared_ptr< Ra::Engine::ShaderParameterProvider > paramProvider,
+                                std::shared_ptr< Ra::Engine::Rendering::RenderObject > ro,
+                                Ra::Engine::Rendering::Renderer * renderer,
+                                std::shared_ptr< Ra::Engine::Data::ShaderParameterProvider > paramProvider,
                                 QWidget *parent = nullptr);
     ~ShaderEditorWidget();
 
@@ -34,8 +34,8 @@ private slots:
 
 private:
     Ui::ShaderEditorWidget *ui;
-    std::shared_ptr< Ra::Engine::RenderObject > _ro;
-    Ra::Engine::Renderer * _renderer;
-    std::shared_ptr< Ra::Engine::ShaderParameterProvider > _paramProvider;
+    std::shared_ptr< Ra::Engine::Rendering::RenderObject > _ro;
+    Ra::Engine::Rendering::Renderer * _renderer;
+    std::shared_ptr< Ra::Engine::Data::ShaderParameterProvider > _paramProvider;
 };
 

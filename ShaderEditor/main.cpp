@@ -1,19 +1,19 @@
 // Include Radium base application and its simple Gui
-#include <GuiBase/BaseApplication.hpp>
-#include <GuiBase/RadiumWindow/SimpleWindowFactory.hpp>
+#include <Gui/BaseApplication.hpp>
+#include <Gui/RadiumWindow/SimpleWindowFactory.hpp>
 
 // include the Engine/entity/component interface
 #include <Core/Geometry/MeshPrimitives.hpp>
-#include <Engine/Component/GeometryComponent.hpp>
-#include <Engine/Managers/EntityManager/EntityManager.hpp>
-#include <Engine/Renderer/RenderObject/RenderObjectManager.hpp>
-#include <Engine/System/GeometrySystem.hpp>
+#include <Engine/Scene/GeometryComponent.hpp>
+#include <Engine/Scene/EntityManager.hpp>
+#include <Engine/Rendering/RenderObjectManager.hpp>
+#include <Engine/Scene/GeometrySystem.hpp>
 
 // include the custom material definition
-#include <Engine/Renderer/Material/RawShaderMaterial.hpp>
+#include <Engine/Data/RawShaderMaterial.hpp>
 
 // include the Viewer to demonstrate dynamic edition of materials
-#include <GuiBase/Viewer/Viewer.hpp>
+#include <Gui/Viewer/Viewer.hpp>
 
 #include "CameraManipulator.hpp"
 #include "ShaderEditorWidget.hpp"
@@ -53,8 +53,8 @@ const std::string _fragmentShaderSource {
 
 
 const ShaderConfigType defaultConfig {
-    {Ra::Engine::ShaderType::ShaderType_VERTEX, _vertexShaderSource},
-    {Ra::Engine::ShaderType::ShaderType_FRAGMENT, _fragmentShaderSource}};
+    {Ra::Engine::Data::ShaderType::ShaderType_VERTEX, _vertexShaderSource},
+    {Ra::Engine::Data::ShaderType::ShaderType_FRAGMENT, _fragmentShaderSource}};
 
 auto paramProvider = std::make_shared<MyParameterProvider>();
 
@@ -64,7 +64,7 @@ auto paramProvider = std::make_shared<MyParameterProvider>();
  * @param app
  * @return The renderObject associated to the created component.
  */
-std::shared_ptr<Ra::Engine::RenderObject> initQuad( Ra::GuiBase::BaseApplication& app ) {
+std::shared_ptr<Ra::Engine::Rendering::RenderObject> initQuad( Ra::Gui::BaseApplication& app ) {
     //! [Creating the quad]
     auto quad = Ra::Core::Geometry::makeZNormalQuad( {1_ra, 1_ra} );
 
@@ -78,7 +78,7 @@ std::shared_ptr<Ra::Engine::RenderObject> initQuad( Ra::GuiBase::BaseApplication
     Ra::Core::Asset::RawShaderMaterialData mat {"Quad Material", defaultConfig, paramProvider};
 
     //! [Create a geometry component using the custom material]
-    auto c = new Ra::Engine::TriangleMeshComponent( "Quad Mesh", e, std::move( quad ), &mat );
+    auto c = new Ra::Engine::Scene::TriangleMeshComponent( "Quad Mesh", e, std::move( quad ), &mat );
 
     //! [Register the entity/component association to the geometry system ]
     auto system = app.m_engine->getSystem( "GeometrySystem" );
@@ -94,11 +94,11 @@ std::shared_ptr<Ra::Engine::RenderObject> initQuad( Ra::GuiBase::BaseApplication
 }
 
 int main( int argc, char* argv[] ) {
-    Ra::GuiBase::BaseApplication app( argc, argv );
-    app.initialize( Ra::GuiBase::SimpleWindowFactory {} );
+    Ra::Gui::BaseApplication app( argc, argv );
+    app.initialize( Ra::Gui::SimpleWindowFactory {} );
 
     //! [add the custom material to the material system]
-    Ra::Engine::RawShaderMaterial::registerMaterial();
+    Ra::Engine::Data::RawShaderMaterial::registerMaterial();
 
     auto ro = initQuad( app );
 

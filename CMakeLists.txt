@@ -40,3 +40,4 @@ add_subdirectory(ShaderEditor)
 
 # CLI apps
 add_subdirectory(CLISubdivider)
+add_subdirectory(CLIRenderer)

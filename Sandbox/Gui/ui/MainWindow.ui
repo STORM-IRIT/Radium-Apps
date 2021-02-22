@@ -7,7 +7,7 @@
     <x>0</x>
     <y>0</y>
     <width>1350</width>
-    <height>936</height>
+    <height>972</height>
    </rect>
   </property>
   <property name="sizePolicy">
@@ -27,7 +27,7 @@
      <x>0</x>
      <y>0</y>
      <width>1350</width>
-     <height>22</height>
+     <height>24</height>
     </rect>
    </property>
    <widget class="QMenu" name="menuFILE">
@@ -225,7 +225,7 @@
              <enum>QTabWidget::West</enum>
             </property>
             <property name="currentIndex">
-             <number>0</number>
+             <number>1</number>
             </property>
             <widget class="QWidget" name="tab_stats">
              <attribute name="title">
@@ -799,7 +799,7 @@
     <bool>true</bool>
    </property>
    <property name="icon">
-    <iconset>
+    <iconset resource="../../Resources/ApplicationIcons.qrc">
      <normaloff>:/Resources/Icons/play_off.png</normaloff>
      <normalon>:/Resources/Icons/pause_off.png</normalon>
      <activeoff>:/Resources/Icons/play_on.png</activeoff>

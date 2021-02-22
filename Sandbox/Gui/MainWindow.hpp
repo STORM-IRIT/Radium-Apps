@@ -4,6 +4,7 @@
 #include <Gui/MainWindowInterface.hpp>
 #include <Gui/RaGui.hpp>
 #include <Gui/SelectionManager/SelectionManager.hpp>
+#include <Gui/SkeletonBasedAnimation/SkeletonBasedAnimationUI.hpp>
 #include <Gui/TimerData/FrameTimerData.hpp>
 #include <Gui/TreeModel/EntityTreeModel.hpp>
 #include <Gui/MaterialEditor.hpp>
@@ -15,18 +16,11 @@
 #include <qdebug.h>
 
 namespace Ra {
-namespace Engine {
-class Entity;
-}
-} // namespace Ra
-
-namespace Ra {
 namespace Gui {
 class EntityTreeModel;
-class Viewer;
-} // namespace Gui
-namespace Gui {
+class SkeletonBasedAnimationUI;
 class Timeline;
+class Viewer;
 } // namespace Gui
 } // namespace Ra
 
@@ -187,6 +181,9 @@ class MainWindow : public Ra::Gui::MainWindowInterface, private Ui::MainWindow
     void clearPluginPaths();
 
   private slots:
+    /// \name Time events
+    /// \{
+
     /// Slot for the user requesting to play/pause time through the time actions.
     void on_actionPlay_triggered( bool checked );
 
@@ -210,6 +207,7 @@ class MainWindow : public Ra::Gui::MainWindowInterface, private Ui::MainWindow
 
     /// Slot for the user requesting to change the time play mode through the timeline.
     void timelineSetPingPong( bool status );
+    /// \}
 
   private:
     /// Stores the internal model of engine objects for selection and visibility.
@@ -223,6 +221,9 @@ class MainWindow : public Ra::Gui::MainWindowInterface, private Ui::MainWindow
 
     /// Viewer widget
     Ra::Gui::Viewer* m_viewer{nullptr};
+
+    /// Skeleton-based animation gui
+    Ra::Gui::SkeletonBasedAnimationUI* m_skelAnim{nullptr};
 
     /// Timeline gui
     Ra::Gui::Timeline* m_timeline{nullptr};

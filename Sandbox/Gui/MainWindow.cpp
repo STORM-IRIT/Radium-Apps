@@ -25,6 +25,7 @@
 #include <Core/Utils/StringUtils.hpp>
 #include <Engine/Scene/SystemDisplay.hpp>
 #include <Engine/Scene/Camera.hpp>
+#include <Engine/Scene/SkeletonBasedAnimationSystem.hpp>
 
 #include <QColorDialog>
 #include <QComboBox>
@@ -64,9 +65,19 @@ MainWindow::MainWindow( QWidget* parent ) : MainWindowInterface( parent ) {
 
     // Register the timeline
     m_timeline = new Ra::Gui::Timeline( this );
-    m_timeline->onChangeEnd( Ra::Engine::RadiumEngine::getInstance()->getEndTime() );
+    m_timeline->onChangeEnd( mainApp->getEngine()->getEndTime() );
     dockWidget_2->setWidget( m_timeline );
-    
+
+    // Register the Skeleton-based animation UI
+    auto animSystem = static_cast<Ra::Engine::Scene::SkeletonBasedAnimationSystem*>(
+        mainApp->getEngine()->getSystem("SkeletonBasedAnimationSystem") );
+    m_skelAnim = new Ra::Gui::SkeletonBasedAnimationUI( animSystem, m_timeline );
+    toolBox->addTab( m_skelAnim, "SkeletonBased Animation" );
+    for ( int i = 0; i < m_skelAnim->getActionNb(); ++i )
+    {
+        toolBar->addAction( m_skelAnim->getAction( i ) );
+    }
+
     setWindowIcon( QPixmap( ":/Resources/Icons/RadiumIcon.png" ) );
     setWindowTitle( QString( "Radium Engine Sandbox" ) );
 
@@ -237,6 +248,10 @@ void MainWindow::createConnections() {
              mainApp,
              &Ra::Gui::BaseApplication::askForUpdate );
 
+    // Skeleton-based Animation
+    connect( m_skelAnim, &Ra::Gui::SkeletonBasedAnimationUI::askForUpdate,
+             mainApp, &Ra::Gui::BaseApplication::askForUpdate );
+
     // Connect engine signals to the appropriate callbacks
     std::function<void( const Engine::Scene::ItemEntry& )> add =
         std::bind( &MainWindow::onItemAdded, this, std::placeholders::_1 );
@@ -400,6 +415,8 @@ void MainWindow::onSelectionChanged( const QItemSelection& /*selected*/,
         }
         else
             { m_currentShaderBox->setCurrentText( "" ); }
+
+        m_skelAnim->selectionChanged( ent );
         m_timeline->selectionChanged( ent );
     }
     else
@@ -409,6 +426,7 @@ void MainWindow::onSelectionChanged( const QItemSelection& /*selected*/,
         m_selectedItemName->setText( "" );
         m_editRenderObjectButton->setEnabled( false );
         m_materialEditor->hide();
+        m_skelAnim->selectionChanged( ItemEntry() );
         m_timeline->selectionChanged( ItemEntry() );
     }
 }
@@ -625,9 +643,6 @@ void MainWindow::addRenderer( const std::string& name, std::shared_ptr<Engine::R
     m_currentRendererCombo->addItem( QString::fromStdString( name ) );
 }
 
-// macros to call TimeSystem's (if it exists) method X and potentially ask for
-// Viewer's update or continuous update.
-
 void MainWindow::on_actionPlay_triggered( bool checked ) {
     Ra::Engine::RadiumEngine::getInstance()->play( checked );
     mainApp->setContinuousUpdate( checked );
@@ -782,6 +797,7 @@ void MainWindow::activateCamera( const std::string& sceneName ) {
             m_viewer->getCameraManipulator()->setCamera(
                 camera->duplicate( systemEntity, "CAMERA_DEFAULT" ) );
         }
+        m_skelAnim->postLoadFile( rootEntity );
     }
 }
 

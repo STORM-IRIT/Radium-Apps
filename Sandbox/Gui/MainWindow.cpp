@@ -214,7 +214,9 @@ void MainWindow::createConnections() {
         &Viewer::displayTexture );
 
     connect( m_enablePostProcess, &QCheckBox::stateChanged, m_viewer, &Viewer::enablePostProcess );
+    connect( m_enablePostProcess, &QCheckBox::stateChanged, mainApp, &MainApplication::askForUpdate );
     connect( m_enableDebugDraw, &QCheckBox::stateChanged, m_viewer, &Viewer::enableDebugDraw );
+    connect( m_enableDebugDraw, &QCheckBox::stateChanged, mainApp, &MainApplication::askForUpdate );
     connect( m_realFrameRate,
              &QCheckBox::stateChanged,
              mainApp,

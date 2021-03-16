@@ -96,7 +96,7 @@ class MainWindow : public Ra::Gui::MainWindowInterface, private Ui::MainWindow
     /// Reset the camera to see all visible objects
     void fitCamera();
     /// clear selection, fit camera and update material name in ui
-    void postLoadFile( const std::string& filename ) override;
+    void prepareDisplay() override;
 
     /// Slot for the "edit" button.
     void editRO();
@@ -132,6 +132,10 @@ class MainWindow : public Ra::Gui::MainWindowInterface, private Ui::MainWindow
     /// Set the background color (updates viewer). If c is invalid, the color is fetch from
     /// QSettings.
     void updateBackgroundColor( QColor c = QColor() );
+
+    /// After loading a file, set the first camera loaded (if any) as the active camera.
+    /// if multiple files are loaded, use the first camera of the first loaded file
+    void activateCamera( const std::string& sceneName );
 
   private slots:
     /// Slot for the "load file" menu.

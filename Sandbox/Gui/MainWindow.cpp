@@ -283,6 +283,7 @@ void MainWindow::loadFile() {
         {
             emit fileLoading( file );
         }
+        activateCamera( pathList.first().toStdString() );
     }
 }
 
@@ -757,28 +758,9 @@ void MainWindow::fitCamera() {
         m_viewer->fitCameraToScene( aabb );
 }
 
-void MainWindow::postLoadFile( const std::string& filename ) {
-    m_viewer->getRenderer()->buildAllRenderTechniques();
-    m_selectionManager->clear();
-    m_currentShaderBox->clear();
-    m_currentShaderBox->setEnabled( false );
-    m_currentShaderBox->addItem( "" ); // add empty item
-    for ( const auto& ro :
-          Engine::RadiumEngine::getInstance()->getRenderObjectManager()->getRenderObjects() )
-    {
-        if ( ro->getType() == Engine::Rendering::RenderObjectType::Geometry )
-        {
-            auto material                 = ro->getMaterial();
-            const std::string& shaderName = material->getMaterialName();
-            m_currentShaderBox->addItem( QString( shaderName.c_str() ) );
-        }
-    }
-
-    fitCamera();
-
-    // TODO : find a better way to activate loaded camera
-    // If a camera is in the loaded scene, use it, else, use default
-    std::string loadedEntityName = Core::Utils::getBaseName( filename, false );
+void MainWindow::activateCamera( const std::string& sceneName ) {
+    // If a camera is in the given scene, use it, else, use default
+    std::string loadedEntityName = Core::Utils::getBaseName( sceneName, false );
     auto rootEntity =
         Engine::RadiumEngine::getInstance()->getEntityManager()->getEntity( loadedEntityName );
     if ( rootEntity != nullptr )
@@ -799,6 +781,27 @@ void MainWindow::postLoadFile( const std::string& filename ) {
                 camera->duplicate( systemEntity, "CAMERA_DEFAULT" ) );
         }
     }
+}
+
+void MainWindow::prepareDisplay() {
+
+    m_selectionManager->clear();
+    m_currentShaderBox->clear();
+    m_currentShaderBox->setEnabled( false );
+    m_currentShaderBox->addItem( "" ); // add empty item
+    for ( const auto& ro :
+          Engine::RadiumEngine::getInstance()->getRenderObjectManager()->getRenderObjects() )
+    {
+        if ( ro->getType() == Engine::Rendering::RenderObjectType::Geometry )
+        {
+            auto material                 = ro->getMaterial();
+            const std::string& shaderName = material->getMaterialName();
+            m_currentShaderBox->addItem( QString( shaderName.c_str() ) );
+        }
+    }
+
+    if ( m_viewer->prepareDisplay() ) { mainApp->askForUpdate(); }
+
 }
 
 void MainWindow::onGLInitialized() {

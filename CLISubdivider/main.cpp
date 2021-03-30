@@ -1,7 +1,7 @@
 #include <Core/Geometry/CatmullClarkSubdivider.hpp>
 #include <Core/Geometry/LoopSubdivider.hpp>
 #include <Core/Geometry/MeshPrimitives.hpp>
-#include <Core/Geometry/TopologicalMesh.hpp>
+#include <Core/Geometry/deprecated/TopologicalMesh.hpp>
 #include <Core/Utils/Log.hpp>
 #include <IO/deprecated/OBJFileManager.hpp>
 #include <memory>
@@ -17,7 +17,7 @@ struct args {
     std::string outputFilename;
     std::string inputFilename;
     std::unique_ptr<
-        OpenMesh::Subdivider::Uniform::SubdividerT<Ra::Core::Geometry::TopologicalMesh, Scalar>>
+        OpenMesh::Subdivider::Uniform::SubdividerT<Ra::Core::Geometry::deprecated::TopologicalMesh, Scalar>>
         subdivider;
 };
 
@@ -98,7 +98,7 @@ int main( int argc, char* argv[] ) {
         else                           { obj.load( a.inputFilename, mesh ); }
 
         // Create topological structure
-        Ra::Core::Geometry::TopologicalMesh topologicalMesh( mesh );
+        Ra::Core::Geometry::deprecated::TopologicalMesh topologicalMesh( mesh );
 
         // Create OpenMesh subdivider, and process topological structure
         a.subdivider->attach( topologicalMesh );

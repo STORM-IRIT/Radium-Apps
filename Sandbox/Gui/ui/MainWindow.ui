@@ -766,7 +766,7 @@
     <string>Snapshot</string>
    </property>
    <property name="toolTip">
-    <string>Takes a shnapshot of the current view</string>
+    <string>Takes a snapshot of the current view</string>
    </property>
   </action>
   <action name="actionTrackball">

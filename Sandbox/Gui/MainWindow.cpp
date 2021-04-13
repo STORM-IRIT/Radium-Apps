@@ -2,15 +2,15 @@
 #include <MainApplication.hpp>
 
 #include <Core/Asset/FileLoaderInterface.hpp>
-#include <Engine/Scene/Entity.hpp>
-#include <Engine/Scene/EntityManager.hpp>
-#include <Engine/Scene/SignalManager.hpp>
 #include <Engine/Data/Material.hpp>
 #include <Engine/Data/MaterialConverters.hpp>
 #include <Engine/Data/Mesh.hpp>
+#include <Engine/Rendering/ForwardRenderer.hpp>
 #include <Engine/Rendering/RenderObject.hpp>
 #include <Engine/Rendering/RenderObjectManager.hpp>
-#include <Engine/Rendering/ForwardRenderer.hpp>
+#include <Engine/Scene/Entity.hpp>
+#include <Engine/Scene/EntityManager.hpp>
+#include <Engine/Scene/SignalManager.hpp>
 #include <Gui/Timeline/Timeline.hpp>
 #include <Gui/TreeModel/EntityTreeModel.hpp>
 #include <Gui/Utils/KeyMappingManager.hpp>
@@ -23,9 +23,9 @@
 #include <PluginBase/RadiumPluginInterface.hpp>
 
 #include <Core/Utils/StringUtils.hpp>
-#include <Engine/Scene/SystemDisplay.hpp>
 #include <Engine/Scene/Camera.hpp>
 #include <Engine/Scene/SkeletonBasedAnimationSystem.hpp>
+#include <Engine/Scene/SystemDisplay.hpp>
 
 #include <QColorDialog>
 #include <QComboBox>
@@ -70,7 +70,7 @@ MainWindow::MainWindow( QWidget* parent ) : MainWindowInterface( parent ) {
 
     // Register the Skeleton-based animation UI
     auto animSystem = static_cast<Ra::Engine::Scene::SkeletonBasedAnimationSystem*>(
-        mainApp->getEngine()->getSystem("SkeletonBasedAnimationSystem") );
+        mainApp->getEngine()->getSystem( "SkeletonBasedAnimationSystem" ) );
     m_skelAnim = new Ra::Gui::SkeletonBasedAnimationUI( animSystem, m_timeline );
     toolBox->addTab( m_skelAnim, "SkeletonBased Animation" );
     for ( int i = 0; i < m_skelAnim->getActionNb(); ++i )
@@ -152,18 +152,11 @@ void MainWindow::createConnections() {
 
     // Timeline setup
     connect( m_timeline, &Ra::Gui::Timeline::playClicked, this, &MainWindow::timelinePlay );
+    connect( m_timeline, &Ra::Gui::Timeline::cursorChanged, this, &MainWindow::timelineGoTo );
     connect(
-        m_timeline, &Ra::Gui::Timeline::cursorChanged, this, &MainWindow::timelineGoTo );
-    connect( m_timeline,
-             &Ra::Gui::Timeline::startChanged,
-             this,
-             &MainWindow::timelineStartChanged );
-    connect(
-        m_timeline, &Ra::Gui::Timeline::endChanged, this, &MainWindow::timelineEndChanged );
-    connect( m_timeline,
-             &Ra::Gui::Timeline::setPingPong,
-             this,
-             &MainWindow::timelineSetPingPong );
+        m_timeline, &Ra::Gui::Timeline::startChanged, this, &MainWindow::timelineStartChanged );
+    connect( m_timeline, &Ra::Gui::Timeline::endChanged, this, &MainWindow::timelineEndChanged );
+    connect( m_timeline, &Ra::Gui::Timeline::setPingPong, this, &MainWindow::timelineSetPingPong );
     connect( m_timeline, &Ra::Gui::Timeline::keyFrameChanged, [=]( Scalar ) {
         mainApp->askForUpdate();
     } );
@@ -203,8 +196,7 @@ void MainWindow::createConnections() {
         &MainWindow::changeRenderObjectShader );
 
     // RO Stuff
-    connect(
-        m_itemModel, &Gui::ItemModel::visibilityROChanged, this, &MainWindow::setROVisible );
+    connect( m_itemModel, &Gui::ItemModel::visibilityROChanged, this, &MainWindow::setROVisible );
     connect( m_editRenderObjectButton, &QPushButton::clicked, this, &MainWindow::editRO );
     connect( m_exportMeshButton, &QPushButton::clicked, this, &MainWindow::exportCurrentMesh );
     connect( m_removeEntityButton, &QPushButton::clicked, this, &MainWindow::deleteCurrentItem );
@@ -225,7 +217,8 @@ void MainWindow::createConnections() {
         &Viewer::displayTexture );
 
     connect( m_enablePostProcess, &QCheckBox::stateChanged, m_viewer, &Viewer::enablePostProcess );
-    connect( m_enablePostProcess, &QCheckBox::stateChanged, mainApp, &MainApplication::askForUpdate );
+    connect(
+        m_enablePostProcess, &QCheckBox::stateChanged, mainApp, &MainApplication::askForUpdate );
     connect( m_enableDebugDraw, &QCheckBox::stateChanged, m_viewer, &Viewer::enableDebugDraw );
     connect( m_enableDebugDraw, &QCheckBox::stateChanged, mainApp, &MainApplication::askForUpdate );
     connect( m_realFrameRate,
@@ -249,8 +242,10 @@ void MainWindow::createConnections() {
              &Ra::Gui::BaseApplication::askForUpdate );
 
     // Skeleton-based Animation
-    connect( m_skelAnim, &Ra::Gui::SkeletonBasedAnimationUI::askForUpdate,
-             mainApp, &Ra::Gui::BaseApplication::askForUpdate );
+    connect( m_skelAnim,
+             &Ra::Gui::SkeletonBasedAnimationUI::askForUpdate,
+             mainApp,
+             &Ra::Gui::BaseApplication::askForUpdate );
 
     // Connect engine signals to the appropriate callbacks
     std::function<void( const Engine::Scene::ItemEntry& )> add =
@@ -300,7 +295,13 @@ void MainWindow::loadFile() {
         {
             emit fileLoading( file );
         }
-        activateCamera( pathList.first().toStdString() );
+        auto sceneName = pathList.first().toStdString();
+        activateCamera( sceneName );
+        // If an animation is loaded, update the Animation related guiGui
+        std::string loadedEntityName = Core::Utils::getBaseName( sceneName, false );
+        auto rootEntity =
+            Engine::RadiumEngine::getInstance()->getEntityManager()->getEntity( loadedEntityName );
+        if ( rootEntity != nullptr ) { m_skelAnim->postLoadFile( rootEntity ); }
     }
 }
 
@@ -338,7 +339,7 @@ void MainWindow::onUpdateFramestats( const std::vector<FrameTimerData>& stats ) 
         }
     }
 
-    const uint N{uint( stats.size() )};
+    const uint N {uint( stats.size() )};
     const Scalar T( N * 1000000.f );
     m_renderTime->setNum( int( sumRender / N ) );
     m_renderUpdates->setNum( int( T / Scalar( sumRender ) ) );
@@ -414,7 +415,7 @@ void MainWindow::onSelectionChanged( const QItemSelection& /*selected*/,
             // to change the material type
         }
         else
-            { m_currentShaderBox->setCurrentText( "" ); }
+        { m_currentShaderBox->setCurrentText( "" ); }
 
         m_skelAnim->selectionChanged( ent );
         m_timeline->selectionChanged( ent );
@@ -636,7 +637,8 @@ void MainWindow::onFrameComplete() {
     }
 }
 
-void MainWindow::addRenderer( const std::string& name, std::shared_ptr<Engine::Rendering::Renderer> e ) {
+void MainWindow::addRenderer( const std::string& name,
+                              std::shared_ptr<Engine::Rendering::Renderer> e ) {
     int id = m_viewer->addRenderer( e );
     CORE_UNUSED( id );
     CORE_ASSERT( id == m_currentRendererCombo->count(), "Inconsistent renderer state" );
@@ -661,35 +663,40 @@ void MainWindow::on_actionStep_triggered() {
 
 void MainWindow::timelinePlay( bool play ) {
     actionPlay->setChecked( play );
-    if ( !m_lockTimeSystem ) { 
+    if ( !m_lockTimeSystem )
+    {
         Ra::Engine::RadiumEngine::getInstance()->play( play );
         mainApp->setContinuousUpdate( play );
     }
 }
 
 void MainWindow::timelineGoTo( double t ) {
-    if ( !m_lockTimeSystem ) {
+    if ( !m_lockTimeSystem )
+    {
         Ra::Engine::RadiumEngine::getInstance()->setTime( Scalar( t ) );
         mainApp->askForUpdate();
     }
 }
 
 void MainWindow::timelineStartChanged( double t ) {
-    if ( !m_lockTimeSystem ) { 
-        Ra::Engine::RadiumEngine::getInstance()->setStartTime( Scalar( t ) ); 
-    	mainApp->askForUpdate();
+    if ( !m_lockTimeSystem )
+    {
+        Ra::Engine::RadiumEngine::getInstance()->setStartTime( Scalar( t ) );
+        mainApp->askForUpdate();
     }
 }
 
 void MainWindow::timelineEndChanged( double t ) {
-    if ( !m_lockTimeSystem ) { 
-        Ra::Engine::RadiumEngine::getInstance()->setEndTime( Scalar( t ) ); 
+    if ( !m_lockTimeSystem )
+    {
+        Ra::Engine::RadiumEngine::getInstance()->setEndTime( Scalar( t ) );
         mainApp->askForUpdate();
     }
 }
 
 void MainWindow::timelineSetPingPong( bool status ) {
-    if ( !m_lockTimeSystem ) { 
+    if ( !m_lockTimeSystem )
+    {
         Ra::Engine::RadiumEngine::getInstance()->setForwardBackward( status );
         mainApp->askForUpdate();
     }
@@ -797,7 +804,6 @@ void MainWindow::activateCamera( const std::string& sceneName ) {
             m_viewer->getCameraManipulator()->setCamera(
                 camera->duplicate( systemEntity, "CAMERA_DEFAULT" ) );
         }
-        m_skelAnim->postLoadFile( rootEntity );
     }
 }
 
@@ -819,7 +825,6 @@ void MainWindow::prepareDisplay() {
     }
 
     if ( m_viewer->prepareDisplay() ) { mainApp->askForUpdate(); }
-
 }
 
 void MainWindow::onGLInitialized() {

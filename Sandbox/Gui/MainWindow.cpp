@@ -8,6 +8,7 @@
 #include <Engine/Rendering/ForwardRenderer.hpp>
 #include <Engine/Rendering/RenderObject.hpp>
 #include <Engine/Rendering/RenderObjectManager.hpp>
+#include <Engine/Scene/CameraManager.hpp>
 #include <Engine/Scene/Entity.hpp>
 #include <Engine/Scene/EntityManager.hpp>
 #include <Engine/Scene/SignalManager.hpp>
@@ -23,8 +24,9 @@
 #include <IO/deprecated/OBJFileManager.hpp>
 #include <PluginBase/RadiumPluginInterface.hpp>
 
+#include <Core/Asset/Camera.hpp>
 #include <Core/Utils/StringUtils.hpp>
-#include <Engine/Scene/Camera.hpp>
+#include <Engine/Scene/CameraComponent.hpp>
 #include <Engine/Scene/SkeletonBasedAnimationSystem.hpp>
 #include <Engine/Scene/SystemDisplay.hpp>
 
@@ -66,7 +68,7 @@ MainWindow::MainWindow( QWidget* parent ) : MainWindowInterface( parent ) {
 
     // Register the timeline
     m_timeline = new Ra::Gui::Timeline( this );
-    m_timeline->onChangeEnd( mainApp->getEngine()->getEndTime() );
+    m_timeline->onChangeEnd( Ra::Engine::RadiumEngine::getInstance()->getEndTime() );
     dockWidget_2->setWidget( m_timeline );
 
     // Register the Skeleton-based animation UI
@@ -765,7 +767,7 @@ void MainWindow::deleteCurrentItem() {
 
 void MainWindow::resetScene() {
     // Fix issue #378 : ask the viewer to switch back to the default camera
-    m_viewer->getCameraManipulator()->resetToDefaultCamera();
+    m_viewer->resetToDefaultCamera();
     // To see why this call is important, please see deleteCurrentItem().
     m_selectionManager->clear();
     Engine::RadiumEngine::getInstance()->getEntityManager()->deleteEntities();
@@ -780,10 +782,11 @@ void MainWindow::fitCamera() {
         mainApp->askForUpdate();
     }
     else
-        m_viewer->fitCameraToScene( aabb );
+    { m_viewer->fitCameraToScene( aabb ); }
 }
 
 void MainWindow::activateCamera( const std::string& sceneName ) {
+
     // If a camera is in the given scene, use it, else, use default
     std::string loadedEntityName = Core::Utils::getBaseName( sceneName, false );
     auto rootEntity =
@@ -798,12 +801,14 @@ void MainWindow::activateCamera( const std::string& sceneName ) {
         {
             LOG( logINFO ) << "Activating camera " << ( *fc )->getName();
 
-            const auto systemEntity = Ra::Engine::Scene::SystemEntity::getInstance();
-            systemEntity->removeComponent( "CAMERA_DEFAULT" );
+            auto cameraManager = static_cast<Ra::Engine::Scene::CameraManager*>(
+                Engine::RadiumEngine::getInstance()->getSystem( "DefaultCameraManager" ) );
 
-            auto camera = static_cast<Ra::Engine::Scene::Camera*>( ( *fc ).get() );
-            m_viewer->getCameraManipulator()->setCamera(
-                camera->duplicate( systemEntity, "CAMERA_DEFAULT" ) );
+            auto comp = static_cast<Ra::Engine::Scene::CameraComponent*>( ( *fc ).get() );
+
+            auto idx = cameraManager->getCameraIndex( comp );
+            cameraManager->activate( idx );
+            m_viewer->getCameraManipulator()->updateCamera();
         }
     }
 }

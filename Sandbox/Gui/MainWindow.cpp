@@ -11,6 +11,7 @@
 #include <Engine/Scene/Entity.hpp>
 #include <Engine/Scene/EntityManager.hpp>
 #include <Engine/Scene/SignalManager.hpp>
+#include <Gui/SkeletonBasedAnimation/SkeletonBasedAnimationUI.hpp>
 #include <Gui/Timeline/Timeline.hpp>
 #include <Gui/TreeModel/EntityTreeModel.hpp>
 #include <Gui/Utils/KeyMappingManager.hpp>

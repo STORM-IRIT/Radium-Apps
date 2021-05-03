@@ -2,12 +2,11 @@
 #define RADIUMENGINE_MAINWINDOW_HPP
 
 #include <Gui/MainWindowInterface.hpp>
+#include <Gui/MaterialEditor.hpp>
 #include <Gui/RaGui.hpp>
 #include <Gui/SelectionManager/SelectionManager.hpp>
-#include <Gui/SkeletonBasedAnimation/SkeletonBasedAnimationUI.hpp>
 #include <Gui/TimerData/FrameTimerData.hpp>
 #include <Gui/TreeModel/EntityTreeModel.hpp>
-#include <Gui/MaterialEditor.hpp>
 
 #include "ui_MainWindow.h"
 #include <QMainWindow>
@@ -60,7 +59,8 @@ class MainWindow : public Ra::Gui::MainWindowInterface, private Ui::MainWindow
     void onFrameComplete() override;
 
     /// Add a renderer in the application: UI, viewer.
-    void addRenderer( const std::string& name, std::shared_ptr<Engine::Rendering::Renderer> e ) override;
+    void addRenderer( const std::string& name,
+                      std::shared_ptr<Engine::Rendering::Renderer> e ) override;
 
   public slots:
     /// Callback to rebuild the item model when the engine objects change.
@@ -211,25 +211,25 @@ class MainWindow : public Ra::Gui::MainWindowInterface, private Ui::MainWindow
 
   private:
     /// Stores the internal model of engine objects for selection and visibility.
-    Gui::ItemModel* m_itemModel{nullptr};
+    Gui::ItemModel* m_itemModel {nullptr};
 
     /// Stores and manages the current selection.
-    Gui::SelectionManager* m_selectionManager{nullptr};
+    Gui::SelectionManager* m_selectionManager {nullptr};
 
     /// Widget to allow material edition.
-    std::unique_ptr<MaterialEditor> m_materialEditor{nullptr};
+    std::unique_ptr<MaterialEditor> m_materialEditor {nullptr};
 
     /// Viewer widget
-    Ra::Gui::Viewer* m_viewer{nullptr};
+    Ra::Gui::Viewer* m_viewer {nullptr};
 
     /// Skeleton-based animation gui
-    Ra::Gui::SkeletonBasedAnimationUI* m_skelAnim{nullptr};
+    Ra::Gui::SkeletonBasedAnimationUI* m_skelAnim {nullptr};
 
     /// Timeline gui
-    Ra::Gui::Timeline* m_timeline{nullptr};
+    Ra::Gui::Timeline* m_timeline {nullptr};
 
     /// Guard TimeSystem against issue with Timeline signals.
-    bool m_lockTimeSystem{false};
+    bool m_lockTimeSystem {false};
 };
 
 } // namespace Gui

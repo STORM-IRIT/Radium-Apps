@@ -1,6 +1,7 @@
 #ifndef RADIUMENGINE_MAINWINDOW_HPP
 #define RADIUMENGINE_MAINWINDOW_HPP
 
+#include <Gui/AboutDialog.hpp>
 #include <Gui/MainWindowInterface.hpp>
 #include <Gui/MaterialEditor.hpp>
 #include <Gui/RaGui.hpp>
@@ -177,8 +178,12 @@ class MainWindow : public Ra::Gui::MainWindowInterface, private Ui::MainWindow
     /// Allow to manage registered plugin paths
     /// @todo : for now, only add a new path ... make full management available
     void addPluginPath();
+
     /// Remove all registered plugin directories
     void clearPluginPaths();
+
+    /// Remove all registered plugin directories
+    void editSettings();
 
   private slots:
     /// \name Time events
@@ -192,6 +197,9 @@ class MainWindow : public Ra::Gui::MainWindowInterface, private Ui::MainWindow
 
     /// Slot for the user requesting to reset time.
     void on_actionStop_triggered();
+
+    /// Slot for the user requesting about.
+    void on_actionAbout_triggered();
 
     /// Slot for the user requesting to play/pause time through the timeline.
     void timelinePlay( bool play );
@@ -230,6 +238,9 @@ class MainWindow : public Ra::Gui::MainWindowInterface, private Ui::MainWindow
 
     /// Guard TimeSystem against issue with Timeline signals.
     bool m_lockTimeSystem {false};
+
+    // About dialog
+    AboutDialog* m_about;
 };
 
 } // namespace Gui

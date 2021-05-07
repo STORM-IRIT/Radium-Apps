@@ -47,6 +47,8 @@ MainWindow::MainWindow( QWidget* parent ) : MainWindowInterface( parent ) {
     // not initialized. Listen to the "started" signal.
 
     setupUi( this );
+    m_about = new AboutDialog( this );
+    connect( m_about, &AboutDialog::settings, this, &MainWindow::editSettings );
 
     m_viewer = new Viewer();
     // Registers the application dependant camera manipulators
@@ -662,6 +664,10 @@ void MainWindow::on_actionStep_triggered() {
     mainApp->askForUpdate();
 }
 
+void MainWindow::on_actionAbout_triggered() {
+    m_about->show();
+}
+
 void MainWindow::timelinePlay( bool play ) {
     actionPlay->setChecked( play );
     if ( !m_lockTimeSystem )
@@ -854,6 +860,11 @@ void MainWindow::addPluginPath() {
 
 void MainWindow::clearPluginPaths() {
     mainApp->clearPluginDirectories();
+}
+
+void MainWindow::editSettings() {
+    LOG( logINFO ) << "Edit settings .";
+    mainApp->editSettings();
 }
 
 } // namespace Gui

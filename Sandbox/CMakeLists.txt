@@ -30,6 +30,7 @@ set(CMAKE_AUTORCC ON)
 set(app_sources
         main.cpp
         MainApplication.cpp
+        Gui/AboutDialog.cpp
         Gui/ColorWidget.cpp
         Gui/MainWindow.cpp
         Gui/MaterialEditor.cpp
@@ -38,6 +39,7 @@ set(app_sources
 
 set(app_headers
         MainApplication.hpp
+        Gui/AboutDialog.hpp
         Gui/ColorWidget.hpp
         Gui/MainWindow.hpp
         Gui/MaterialEditor.hpp
@@ -47,6 +49,7 @@ set(app_headers
    )
 
 set(app_uis
+        Gui/ui/AboutDialog.ui
         Gui/ui/MainWindow.ui
         Gui/ui/MaterialEditor.ui
         Gui/ui/RotationEditor.ui

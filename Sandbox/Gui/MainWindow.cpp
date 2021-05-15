@@ -599,6 +599,14 @@ void Gui::MainWindow::showHideAllRO() {
     mainApp->askForUpdate();
 }
 
+void Gui::MainWindow::displayHelpDialog() {
+    QMessageBox helpMsg;
+    helpMsg.setText( QString( "<h1>Key Mapping</h1>" ) +
+                     Gui::KeyMappingManager::getInstance()->getHelpText().c_str() );
+
+    helpMsg.exec();
+}
+
 void Gui::MainWindow::openMaterialEditor() {
     m_materialEditor->show();
 }

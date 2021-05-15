@@ -101,6 +101,7 @@ class MainWindow : public Ra::Gui::MainWindowInterface, private Ui::MainWindow
     /// Show or hide all render objects
     void showHideAllRO();
 
+    void displayHelpDialog() override;
   signals:
     /// Emitted when the frame loads
     void fileLoading( const QString path );

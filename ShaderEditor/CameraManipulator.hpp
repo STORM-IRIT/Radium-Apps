@@ -6,15 +6,15 @@ class CameraManipulator2D : public Ra::Gui::TrackballCameraManipulator
 {
 public:
     /// Default constructor
-    inline CameraManipulator2D( uint width, uint height )
-    : Ra::Gui::TrackballCameraManipulator( width, height ) {}
+    inline CameraManipulator2D(  )
+    : Ra::Gui::TrackballCameraManipulator(  ) {}
 
     /// Copy constructor used when switching camera manipulator
     /// Requires that m_target is on the line of sight of the camera.
     inline explicit CameraManipulator2D( const CameraManipulator& other )
     : Ra::Gui::TrackballCameraManipulator( other ) {}
 
-    inline 
+    inline
     bool handleMousePressEvent( QMouseEvent* event,
                                 const Qt::MouseButtons& buttons,
                                 const Qt::KeyboardModifiers& modifiers,
@@ -43,4 +43,3 @@ public:
 }
 
 };
-

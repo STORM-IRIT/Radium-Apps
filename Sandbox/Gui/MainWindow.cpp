@@ -92,6 +92,9 @@ MainWindow::MainWindow( QWidget* parent ) : MainWindowInterface( parent ) {
     m_selectionManager = new Gui::SelectionManager( m_itemModel, this );
     m_entitiesTreeView->setSelectionModel( m_selectionManager );
 
+    m_currentShaderBox->setEnabled( false );
+    m_currentShaderBox->addItem( "" ); // add empty item
+
     createConnections();
 
     mainApp->framesCountForStatsChanged( uint( m_avgFramesCount->value() ) );
@@ -392,7 +395,6 @@ void MainWindow::handlePicking( const Engine::Rendering::Renderer::PickingResult
 
 void MainWindow::onSelectionChanged( const QItemSelection& /*selected*/,
                                      const QItemSelection& /*deselected*/ ) {
-    m_currentShaderBox->setEnabled( false );
 
     if ( m_selectionManager->hasSelection() )
     {
@@ -414,17 +416,21 @@ void MainWindow::onSelectionChanged( const QItemSelection& /*selected*/,
             CORE_ASSERT( m_currentShaderBox->findText( shaderName.c_str() ) != -1,
                          "RO shaders must be already added to the list" );
             m_currentShaderBox->setCurrentText( shaderName.c_str() );
-            // m_currentShaderBox->setEnabled( true ); // commented out, as there is no simple way
+            m_currentShaderBox->setEnabled(
+                true ); // just to allow exploration, as there is no simple way
             // to change the material type
         }
         else
-        { m_currentShaderBox->setCurrentText( "" ); }
-
+        {
+            m_currentShaderBox->setEnabled( false );
+            m_currentShaderBox->setCurrentText( "" );
+        }
         m_skelAnim->selectionChanged( ent );
         m_timeline->selectionChanged( ent );
     }
     else
     {
+        m_currentShaderBox->setEnabled( false );
         m_currentShaderBox->setCurrentText( "" );
         emit selectedItem( ItemEntry() );
         m_selectedItemName->setText( "" );
@@ -707,10 +713,60 @@ void MainWindow::timelineSetPingPong( bool status ) {
 
 void MainWindow::onItemAdded( const Engine::Scene::ItemEntry& ent ) {
     m_itemModel->addItem( ent );
+
+    // update the m_currentShaderBox for added RO
+    if ( ent.isRoNode() )
+    {
+        auto ro = Engine::RadiumEngine::getInstance()->getRenderObjectManager()->getRenderObject(
+            ent.m_roIndex );
+        if ( ro->getType() == Engine::Rendering::RenderObjectType::Geometry )
+        {
+            auto material                 = ro->getMaterial();
+            const std::string& shaderName = material->getMaterialName();
+            auto i                        = m_currentShaderBox->findText( shaderName.c_str() );
+            if ( i == -1 )
+            {
+                QVariant refCount( 1 );
+                m_currentShaderBox->addItem( QString( shaderName.c_str() ), refCount );
+            }
+            else
+            {
+                auto refCount = m_currentShaderBox->itemData( i );
+                refCount      = refCount.toInt() + 1;
+                m_currentShaderBox->setItemData( i, refCount );
+            }
+        }
+    }
 }
 
 void MainWindow::onItemRemoved( const Engine::Scene::ItemEntry& ent ) {
     m_itemModel->removeItem( ent );
+    // update the m_currentShaderBox for removed RO
+    if ( ent.isRoNode() )
+    {
+        auto ro = Engine::RadiumEngine::getInstance()->getRenderObjectManager()->getRenderObject(
+            ent.m_roIndex );
+        if ( ro->getType() == Engine::Rendering::RenderObjectType::Geometry )
+        {
+            auto material                 = ro->getMaterial();
+            const std::string& shaderName = material->getMaterialName();
+            auto i                        = m_currentShaderBox->findText( shaderName.c_str() );
+            if ( i == -1 )
+            {
+                // Should never be there ...
+                LOG( logERROR ) << "MainWindow::onItemRemoved : trying to remove a non existing "
+                                   "ShaderBox entry";
+            }
+            else
+            {
+                auto refCount = m_currentShaderBox->itemData( i );
+                refCount      = refCount.toInt() - 1;
+                if ( refCount.toInt() == 0 ) { m_currentShaderBox->removeItem( i ); }
+                else
+                { m_currentShaderBox->setItemData( i, refCount ); }
+            }
+        }
+    }
 }
 
 void MainWindow::exportCurrentMesh() {
@@ -814,21 +870,9 @@ void MainWindow::activateCamera( const std::string& sceneName ) {
 }
 
 void MainWindow::prepareDisplay() {
-
     m_selectionManager->clear();
-    m_currentShaderBox->clear();
     m_currentShaderBox->setEnabled( false );
-    m_currentShaderBox->addItem( "" ); // add empty item
-    for ( const auto& ro :
-          Engine::RadiumEngine::getInstance()->getRenderObjectManager()->getRenderObjects() )
-    {
-        if ( ro->getType() == Engine::Rendering::RenderObjectType::Geometry )
-        {
-            auto material                 = ro->getMaterial();
-            const std::string& shaderName = material->getMaterialName();
-            m_currentShaderBox->addItem( QString( shaderName.c_str() ) );
-        }
-    }
+    m_currentShaderBox->setCurrentText( "" );
 
     if ( m_viewer->prepareDisplay() ) { mainApp->askForUpdate(); }
 }

@@ -92,9 +92,6 @@ MainWindow::MainWindow( QWidget* parent ) : MainWindowInterface( parent ) {
     m_selectionManager = new Gui::SelectionManager( m_itemModel, this );
     m_entitiesTreeView->setSelectionModel( m_selectionManager );
 
-    m_currentShaderBox->setEnabled( false );
-    m_currentShaderBox->addItem( "" ); // add empty item
-
     createConnections();
 
     mainApp->framesCountForStatsChanged( uint( m_avgFramesCount->value() ) );
@@ -395,6 +392,7 @@ void MainWindow::handlePicking( const Engine::Rendering::Renderer::PickingResult
 
 void MainWindow::onSelectionChanged( const QItemSelection& /*selected*/,
                                      const QItemSelection& /*deselected*/ ) {
+    m_currentShaderBox->setEnabled( false );
 
     if ( m_selectionManager->hasSelection() )
     {

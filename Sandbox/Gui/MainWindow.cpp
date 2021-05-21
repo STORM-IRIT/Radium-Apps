@@ -416,15 +416,9 @@ void MainWindow::onSelectionChanged( const QItemSelection& /*selected*/,
             CORE_ASSERT( m_currentShaderBox->findText( shaderName.c_str() ) != -1,
                          "RO shaders must be already added to the list" );
             m_currentShaderBox->setCurrentText( shaderName.c_str() );
-            m_currentShaderBox->setEnabled(
-                true ); // just to allow exploration, as there is no simple way
-            // to change the material type
         }
         else
-        {
-            m_currentShaderBox->setEnabled( false );
-            m_currentShaderBox->setCurrentText( "" );
-        }
+        { m_currentShaderBox->setCurrentText( "" ); }
         m_skelAnim->selectionChanged( ent );
         m_timeline->selectionChanged( ent );
     }

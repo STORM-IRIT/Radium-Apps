@@ -108,6 +108,34 @@ MainWindow::~MainWindow() {
 }
 
 void MainWindow::cleanup() {
+    if ( auto signalManager = Ra::Engine::RadiumEngine::getInstance()->getSignalManager() )
+    {
+        {
+            auto& obs = signalManager->getEntityCreatedNotifier();
+            obs.detach( m_entityAddObserverId );
+        }
+        {
+            auto& obs = signalManager->getEntityDestroyedNotifier();
+            obs.detach( m_entityRemoveObserverId );
+        }
+        {
+            auto& obs = signalManager->getComponentCreatedNotifier();
+            obs.detach( m_componentAddObserverId );
+        }
+        {
+            auto& obs = signalManager->getComponentDestroyedNotifier();
+            obs.detach( m_componentRemoveObserverId );
+        }
+        {
+            auto& obs = signalManager->getRenderObjectCreatedNotifier();
+            obs.detach( m_roAddObserverId );
+        }
+        {
+            auto& obs = signalManager->getRenderObjectDestroyedNotifier();
+            obs.detach( m_roRemoveObserverId );
+        }
+    }
+    m_timeline->detachFromEngine();
     m_viewer->getGizmoManager()->cleanup();
 }
 
@@ -254,18 +282,22 @@ void MainWindow::createConnections() {
              &Ra::Gui::BaseApplication::askForUpdate );
 
     // Connect engine signals to the appropriate callbacks
-    std::function<void( const Engine::Scene::ItemEntry& )> add =
-        std::bind( &MainWindow::onItemAdded, this, std::placeholders::_1 );
-    std::function<void( const Engine::Scene::ItemEntry& )> del =
-        std::bind( &MainWindow::onItemRemoved, this, std::placeholders::_1 );
-    mainApp->m_engine->getSignalManager()->m_entityCreatedCallbacks.push_back( add );
-    mainApp->m_engine->getSignalManager()->m_entityDestroyedCallbacks.push_back( del );
+    auto signalManager = Ra::Engine::RadiumEngine::getInstance()->getSignalManager();
 
-    mainApp->m_engine->getSignalManager()->m_componentAddedCallbacks.push_back( add );
-    mainApp->m_engine->getSignalManager()->m_componentRemovedCallbacks.push_back( del );
+    auto& entityAddedObs = signalManager->getEntityCreatedNotifier();
+    m_entityAddObserverId = entityAddedObs.attachMember( this, &MainWindow::onItemAdded);
+    auto& entityRemovedObs = signalManager->getEntityDestroyedNotifier();
+    m_entityRemoveObserverId = entityRemovedObs.attachMember( this, &MainWindow::onItemRemoved);
 
-    mainApp->m_engine->getSignalManager()->m_roAddedCallbacks.push_back( add );
-    mainApp->m_engine->getSignalManager()->m_roRemovedCallbacks.push_back( del );
+    auto& componentAddedObs = signalManager->getComponentCreatedNotifier();
+    m_componentAddObserverId = componentAddedObs.attachMember( this, &MainWindow::onItemAdded);
+    auto& componentRemovedObs = signalManager->getComponentDestroyedNotifier();
+    m_componentRemoveObserverId = componentRemovedObs.attachMember( this, &MainWindow::onItemRemoved);
+
+    auto& roAddedObs = signalManager->getRenderObjectCreatedNotifier();
+    m_roAddObserverId = roAddedObs.attachMember( this, &MainWindow::onItemAdded);
+    auto& roRemovedObs = signalManager->getRenderObjectDestroyedNotifier();
+    m_roRemoveObserverId = roRemovedObs.attachMember( this, &MainWindow::onItemRemoved);
 }
 
 void MainWindow::loadFile() {

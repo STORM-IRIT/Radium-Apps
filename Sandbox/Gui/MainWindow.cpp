@@ -508,7 +508,7 @@ void MainWindow::updateDisplayedTexture() {
 }
 
 void MainWindow::updateBackgroundColor( QColor c ) {
-    // FIXME : sometime, settings does not define colrs but Qt found one ....
+    // FIXME : sometime, settings does not define colors but Qt found one ....
     QSettings settings;
     // Get or set color from/to settings
     if ( !c.isValid() )

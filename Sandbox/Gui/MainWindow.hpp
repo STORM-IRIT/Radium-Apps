@@ -230,6 +230,16 @@ class MainWindow : public Ra::Gui::MainWindowInterface, private Ui::MainWindow
 
     /// Guard TimeSystem against issue with Timeline signals.
     bool m_lockTimeSystem {false};
+
+    /// Observers id for engine event
+    ///@{
+    int m_entityAddObserverId {-1};
+    int m_entityRemoveObserverId {-1};
+    int m_componentAddObserverId {-1};
+    int m_componentRemoveObserverId {-1};
+    int m_roAddObserverId {-1};
+    int m_roRemoveObserverId {-1};
+    ///@}
 };
 
 } // namespace Gui

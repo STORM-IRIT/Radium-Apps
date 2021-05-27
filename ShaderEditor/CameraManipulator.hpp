@@ -4,42 +4,32 @@
 
 class CameraManipulator2D : public Ra::Gui::TrackballCameraManipulator
 {
-public:
+  public:
     /// Default constructor
-    inline CameraManipulator2D(  )
-    : Ra::Gui::TrackballCameraManipulator(  ) {}
+    inline CameraManipulator2D() : Ra::Gui::TrackballCameraManipulator() {}
 
     /// Copy constructor used when switching camera manipulator
     /// Requires that m_target is on the line of sight of the camera.
-    inline explicit CameraManipulator2D( const CameraManipulator& other )
-    : Ra::Gui::TrackballCameraManipulator( other ) {}
+    inline explicit CameraManipulator2D( const CameraManipulator& other ) :
+        Ra::Gui::TrackballCameraManipulator( other ) {}
 
-    inline
-    bool handleMousePressEvent( QMouseEvent* event,
-                                const Qt::MouseButtons& buttons,
-                                const Qt::KeyboardModifiers& modifiers,
-                                int key ) {
-    bool handled = false;
-    m_lastMouseX = event->pos().x();
-    m_lastMouseY = event->pos().y();
+    inline bool handleMousePressEvent( QMouseEvent* event,
+                                       const Qt::MouseButtons& buttons,
+                                       const Qt::KeyboardModifiers& modifiers,
+                                       int key ) {
+        m_lastMouseX = event->pos().x();
+        m_lastMouseY = event->pos().y();
 
-    auto action = Ra::Gui::KeyMappingManager::getInstance()->getAction(
-        Ra::Gui::KeyMappingManageable<TrackballCameraManipulator>::
-        getContext(), buttons, modifiers, key, false );
+        m_currentAction = Ra::Gui::KeyMappingManager::getInstance()->getAction(
+            Ra::Gui::TrackballCameraManipulator::TrackballCameraMapping::getContext(),
+            buttons,
+            modifiers,
+            key,
+            false );
 
-
-    if ( action == TRACKBALLCAMERA_PAN )
-    {
-        m_cameraPanMode = true;
-        handled         = true;
+        // ignore rotate
+        if ( m_currentAction == TRACKBALLCAMERA_ROTATE )
+        { m_currentAction = Ra::Core::Utils::Index::Invalid(); }
+        return true;
     }
-    if ( action == TRACKBALLCAMERA_ZOOM )
-    {
-        m_cameraZoomMode = true;
-        handled          = true;
-    }
-
-    return handled;
-}
-
 };

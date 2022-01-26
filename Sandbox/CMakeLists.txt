@@ -21,8 +21,8 @@ find_package( Radium REQUIRED Core Engine Gui PluginBase IO)
 # Application specific
 
 
-find_package(Qt5 COMPONENTS Core Widgets OpenGL REQUIRED)
-set( Qt5_LIBRARIES Qt5::Core Qt5::Widgets Qt5::OpenGL )
+find_qt_package(COMPONENTS Core Widgets OpenGL REQUIRED)
+set( Qt_LIBRARIES Qt::Core Qt::Widgets Qt::OpenGL )
 
 set(CMAKE_AUTOMOC ON)
 set(CMAKE_AUTORCC ON)
@@ -53,7 +53,7 @@ set(app_uis
         Gui/ui/VectorEditor.ui
    )
 
-qt5_wrap_ui(app_uis_moc ${app_uis})
+qt_wrap_ui(app_uis_moc ${app_uis})
 
 set(app_resources
         Resources/ApplicationIcons.qrc
@@ -79,7 +79,7 @@ target_link_libraries (${PROJECT_NAME} PUBLIC
     Radium::Engine
     Radium::Gui
     Radium::IO
-    ${Qt5_LIBRARIES})
+    ${Qt_LIBRARIES})
 
 configure_radium_app(
     NAME ${PROJECT_NAME}

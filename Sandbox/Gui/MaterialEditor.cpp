@@ -101,8 +101,8 @@ void MaterialEditor::newKdColor( const QColor& color ) {
 
     if ( m_renderObject && m_usable )
     {
-        m_blinnphongmaterial->m_kd =
-            Core::Utils::Color( color.redF(), color.greenF(), color.blueF(), 1. );
+        m_blinnphongmaterial->m_kd = Core::Utils::Color(
+            Scalar( color.redF() ), Scalar( color.greenF() ), Scalar( color.blueF() ), 1_ra );
         updateEngine();
     }
 }
@@ -118,8 +118,8 @@ void MaterialEditor::newKsColor( const QColor& color ) {
 
     if ( m_renderObject && m_usable )
     {
-        m_blinnphongmaterial->m_ks =
-            Core::Utils::Color( color.redF(), color.greenF(), color.blueF(), 1. );
+        m_blinnphongmaterial->m_ks = Core::Utils::Color(
+            Scalar( color.redF() ), Scalar( color.greenF() ), Scalar( color.blueF() ), 1_ra );
         updateEngine();
     }
 }

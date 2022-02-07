@@ -12,7 +12,7 @@ env:
   ext-dir: ${GITHUB_WORKSPACE//\\//}/external/install/
 
 jobs:
-  build:
+  build-rc:
     runs-on: ${{ matrix.config.os }}
     strategy:
       fail-fast: false

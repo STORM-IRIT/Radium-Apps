@@ -1,4 +1,4 @@
-name: Compile Radium Apps
+name: Compile Radium Apps (Release Candidate)
 
 defaults:
   run:

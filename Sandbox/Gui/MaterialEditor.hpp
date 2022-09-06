@@ -5,7 +5,7 @@
 #include <memory>
 
 #include <Core/Utils/Index.hpp>
-#include <Gui/MaterialParameterEditor/MaterialParameterEditor.hpp>
+#include <Gui/ParameterSetEditor/MaterialParameterEditor.hpp>
 
 class QCloseEvent;
 class QShowEvent;

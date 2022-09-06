@@ -48,7 +48,6 @@ set(app_headers
 
 set(app_uis
         Gui/ui/MainWindow.ui
-        Gui/ui/MaterialEditor.ui
         Gui/ui/RotationEditor.ui
         Gui/ui/VectorEditor.ui
    )

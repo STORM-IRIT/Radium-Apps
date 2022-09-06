@@ -1,24 +1,22 @@
-#ifndef RADIUMENGINE_MATERIALEDITOR_HPP
-#define RADIUMENGINE_MATERIALEDITOR_HPP
+#pragma once
 
 #include <QWidget>
 
 #include <memory>
 
 #include <Core/Utils/Index.hpp>
-
-#include <ui_MaterialEditor.h>
+#include <Gui/ParameterSetEditor/MaterialParameterEditor.hpp>
 
 class QCloseEvent;
 class QShowEvent;
 
 namespace Ra {
 namespace Engine {
-namespace Rendering{
+namespace Rendering {
 class RadiumEngine;
 class RenderObjectManager;
 class RenderObject;
-}
+} // namespace Rendering
 namespace Data {
 class Material;
 class BlinnPhongMaterial;
@@ -28,7 +26,7 @@ class BlinnPhongMaterial;
 
 namespace Ra {
 namespace Gui {
-class MaterialEditor : public QWidget, private Ui::MaterialEditor
+class MaterialEditor : public QWidget
 {
     Q_OBJECT
 
@@ -40,45 +38,19 @@ class MaterialEditor : public QWidget, private Ui::MaterialEditor
   signals:
     void materialChanged();
 
-  private slots:
-
-    void updateBlinnPhongViz();
-
-    void onKdColorChanged( int );
-    void onKsColorChanged( int );
-
-    void onExpChanged( double );
-
-    void newKdColor( const QColor& color );
-    void newKsColor( const QColor& color );
-
-    void on_m_closeButton_clicked();
-    void on_kUsePerVertex_clicked( bool checked );
-
   protected:
     virtual void showEvent( QShowEvent* e ) override;
     virtual void closeEvent( QCloseEvent* e ) override;
-    void updateEngine();
 
   private:
+    Ra::Gui::MaterialParameterEditor* m_matParamsEditor;
+
     bool m_visible;
 
     Core::Utils::Index m_roIdx;
     std::shared_ptr<Engine::Rendering::RenderObject> m_renderObject;
 
-    /// TODO generalize material editor to others materials
-    bool m_usable;
-    Ra::Engine::Data::BlinnPhongMaterial* m_blinnphongmaterial;
-
-  private:
-    enum {
-        OUTPUT_FINAL    = 0,
-        OUTPUT_DIFFUSE  = 1,
-        OUTPUT_SPECULAR = 2,
-        OUTPUT_NORMAL   = 3,
-    };
+    std::shared_ptr<Ra::Engine::Data::Material> m_material;
 };
 } // namespace Gui
 } // namespace Ra
-
-#endif // RADIUMENGINE_MATERIALEDITOR_HPP

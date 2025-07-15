@@ -33,7 +33,7 @@ jobs:
         uses: jurplel/install-qt-action@v4
         with:
           cache: true
-          cache-key-prefix: install-qt-action-${{ matrix.config.name }}-${{ matrix.qtversion.value }}
+          cache-key-prefix: install-qt-action-${{ matrix.config.name }}-6.2.9
           version: 6.2.0
 
       - name: Prepare directories

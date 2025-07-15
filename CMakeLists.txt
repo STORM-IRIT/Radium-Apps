@@ -1,4 +1,4 @@
-cmake_minimum_required (VERSION 3.6)
+cmake_minimum_required (VERSION 3.18)
 project(Radium-apps)
 
 # Set default build type to Release
@@ -24,8 +24,6 @@ if (CMAKE_INSTALL_PREFIX_INITIALIZED_TO_DEFAULT)
     set(CMAKE_INSTALL_PREFIX_INITIALIZED_TO_DEFAULT False)
 endif()
 
-# Disable in-source builds
-set(CMAKE_DISABLE_IN_SOURCE_BUILD ON)
 
 # Be nice to visual studio
 set_property(GLOBAL PROPERTY USE_FOLDERS ON)

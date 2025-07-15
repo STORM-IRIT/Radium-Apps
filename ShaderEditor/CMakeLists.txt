@@ -1,5 +1,5 @@
 # Build Radium Painter
-cmake_minimum_required(VERSION 3.8)
+cmake_minimum_required(VERSION 3.18)
 if(${CMAKE_MAJOR_VERSION}.${CMAKE_MINOR_VERSION} VERSION_GREATER "3.9")
     cmake_policy(SET CMP0071 NEW)
 endif()

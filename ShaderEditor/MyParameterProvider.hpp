@@ -14,8 +14,8 @@ class MyParameterProvider : public Ra::Engine::Data::ShaderParameterProvider
         // Method called before drawing each frame in Renderer::updateRenderObjectsInternal.
         // The name of the parameter corresponds to the shader's uniform name.
         auto& renderParameters = getParameters();
-        renderParameters.addParameter( "aColorUniform", m_colorParameter );
-        renderParameters.addParameter( "aScalarUniform", m_scalarParameter );
+        renderParameters.setVariable( "aColorUniform", m_colorParameter );
+        renderParameters.setVariable( "aScalarUniform", m_scalarParameter );
     }
     void setOrComputeTheParameterValues() {
         // client side computation of the parameters, e.g.
@@ -27,4 +27,3 @@ class MyParameterProvider : public Ra::Engine::Data::ShaderParameterProvider
     Ra::Core::Utils::Color m_colorParameter {Ra::Core::Utils::Color::Green()};
     Scalar m_scalarParameter {1};
 };
-

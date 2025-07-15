@@ -1,4 +1,5 @@
-cmake_minimum_required(VERSION 3.6)
+cmake_minimum_required(VERSION 3.18)
+
 #-------------------------------------------------------------------------------
 # exampleApp executables setup
 project(Radium-CLI-Subdivider)

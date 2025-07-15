@@ -53,7 +53,7 @@ jobs:
 
       - name: Clone Radium
         run: |
-          cd src && git clone https://github.com/STORM-IRIT/Radium-Engine.git --single-branch --branch release-candidate && cd ..
+          cd src && git clone --recurse-submodules https://github.com/STORM-IRIT/Radium-Engine.git --single-branch --branch release-candidate && cd ..
 
       - name: Cache externals
         id: cache-external

@@ -8,8 +8,15 @@ on:
   pull_request:
     branches:
       - master
+      - release-candidate
+  push:
+    branches:
+      - release-candidate
+
 env:
-  ext-dir: ${GITHUB_WORKSPACE//\\//}/external/install/
+  install_prefix: install
+  build_prefix: build
+  src_prefix: src
 
 jobs:
   build:
@@ -18,12 +25,23 @@ jobs:
       fail-fast: false
       matrix:
         config:
-          - { name: "Windows MSVC", suffix: "Windows", os: windows-latest, cc: "cl.exe", cxx: "cl.exe", assimp: "OFF" }
+          - { name: "Windows MSVC", suffix: "Windows", os: windows-latest, cc: "cl.exe", cxx: "cl.exe", assimp: "OFF"}
           - { name: "Ubuntu gcc", suffix: "Ubuntu-gcc", os: ubuntu-24.04, cc: "gcc", cxx: "g++", assimp: "ON" }
           - { name: "MacOS clang", suffix: "macOS", os: macos-latest, cc: "clang", cxx: "clang++", assimp: "ON" }
-
+        build-type:
+          - "Release"
     steps:
-      - uses: seanmiddleditch/gha-setup-ninja@master
+      - name: Compute paths
+        id: paths
+        run: |
+          radium_build_dir="${{ env.build_prefix }}/${{ matrix.build-type }}/Radium-Engine"
+          radium_install_dir="${{ env.install_prefix }}/${{ matrix.build-type }}/Radium-Engine"
+          external_build_dir="${{ env.build_prefix }}/${{ matrix.build-type }}/external"
+          external_install_dir="${{ env.install_prefix }}/${{ matrix.build-type }}/external"
+          echo "radium_build_dir=$radium_build_dir" >> $GITHUB_OUTPUT
+          echo "radium_install_dir=$radium_install_dir" >> $GITHUB_OUTPUT
+          echo "external_build_dir=$external_build_dir" >> $GITHUB_OUTPUT
+          echo "external_install_dir=$external_install_dir" >> $GITHUB_OUTPUT
 
       - name: Add msbuild to PATH
         uses: seanmiddleditch/gha-setup-vsdevenv@master
@@ -33,47 +51,49 @@ jobs:
         uses: jurplel/install-qt-action@v4
         with:
           cache: true
-          cache-key-prefix: install-qt-action-${{ matrix.config.name }}-6.2.9
+          cache-key-prefix: install-qt-action-${{ matrix.config.name }}-6.2.0
           version: 6.2.0
 
       - name: Prepare directories
         run: |
-          mkdir -p install/
-          mkdir -p src/
-          mkdir -p src/Radium-Apps
-          mkdir -p build/Radium-Engine
-          mkdir -p build/Radium-Apps
-          mkdir -p external/install/
-          mkdir -p external/build/
+          mkdir -p "${{ env.src_prefix }}"
+          mkdir -p "${{ steps.paths.outputs.radium_build_dir }}"
+          mkdir -p "${{ steps.paths.outputs.external_build_dir }}"
+          mkdir -p "${{ steps.paths.outputs.radium_install_dir }}"
+          mkdir -p "${{ steps.paths.outputs.external_install_dir }}"
 
       - name: Clone Radium
         run: |
-          cd src && git clone --recurse-submodules https://github.com/STORM-IRIT/Radium-Engine.git --single-branch && cd ..
+          git clone --recurse-submodules https://github.com/STORM-IRIT/Radium-Engine.git --single-branch ${{ env.src_prefix }}/Radium-Engine
+          radium_sha=`git -C ${{ env.src_prefix }}/Radium-Engine rev-parse --short HEAD`
+          echo "radium_sha=$radium_sha" >> $GITHUB_OUTPUT
 
-      - name: Cache externals
-        id: cache-external
+      - name: Cache radium install
+        id: cache-radium-install
         uses: actions/cache@v4
         with:
-          path: external
-          key: ${{ runner.os }}-${{ matrix.config.cc }}-external-${{ hashFiles('src/Radium-Engine/external/**/CMakeLists.txt') }}
-
-      - name: Configure and build external
-        if: steps.cache-external.outputs.cache-hit != 'true'
+          path: |
+            ${{ steps.paths.outputs.external_install_dir }}
+            ${{ steps.paths.outputs.radium_install_dir }}
+          key: ${{ matrix.config.name }}-radium-v1-${{ steps.sha.outputs.radium_sha }}
+      - name: Cache radium build
+        id: cache-radium-build
+        uses: actions/cache@v4
+        with:
+          path: |
+            ${{ steps.paths.outputs.external_build_dir }}
+            ${{ steps.paths.outputs.radium_build_dir }}
+          key: ${{ matrix.config.name }}-radium-build-v1
+      - name: Configure and build radium
+        if: steps.cache-radium-install.outputs.cache-hit != 'true'
         run: |
-          cd external/build/
-          cmake ../../src/Radium-Engine/external  -GNinja -DCMAKE_CXX_COMPILER=${{ matrix.config.cxx }} -DCMAKE_C_COMPILER=${{ matrix.config.cc }} -DCMAKE_BUILD_TYPE=Release -DRADIUM_IO_ASSIMP=${{ matrix.config.assimp }} -DCMAKE_EXECUTE_PROCESS_COMMAND_ECHO=STDOUT -DRADIUM_UPDATE_VERSION=OFF -DRADIUM_EXTERNAL_CMAKE_INSTALL_MESSAGE=LAZY -DCMAKE_INSTALL_PREFIX=../install/
-          cmake --build . --parallel --config Release
-
-      - name: Configure Radium
-        run: |
-          cd build/Radium-Engine
-          cmake ../../src/Radium-Engine -GNinja -DCMAKE_CXX_COMPILER=${{ matrix.config.cxx }} -DCMAKE_C_COMPILER=${{ matrix.config.cc }} -DCMAKE_BUILD_TYPE=Release -DCMAKE_INSTALL_PREFIX=../../install/ -DRADIUM_IO_ASSIMP=${{ matrix.config.assimp }} -DCMAKE_EXECUTE_PROCESS_COMMAND_ECHO=STDOUT -DRADIUM_UPDATE_VERSION=OFF -DRADIUM_EXTERNAL_CMAKE_INSTALL_MESSAGE=LAZY -DRADIUM_INSTALL_DOC=OFF -DRADIUM_ENABLE_TESTING=OFF -C ${{env.ext-dir}}/radium-options.cmake
-
-      - name: Build Radium
-        run: |
-          cd build/Radium-Engine
-          cmake --build . --parallel --config Release --target install
-
+           "${{ env.src_prefix }}/Radium-Engine/scripts/build.sh" \
+           -B ${{ env.build_prefix }} \
+           -G Ninja --cxx ${{ matrix.config.cxx }} --cc ${{ matrix.config.cc }} \
+           -c ${{ matrix.build-type }} --enable-testing OFF \
+           --install-external "${{ steps.paths.outputs.external_install_dir }}" \
+           --install-radium "${{ steps.paths.outputs.radium_install_dir }}" 
+          
       - name: Clone Radium Apps
         uses: actions/checkout@master
         with:
@@ -81,10 +101,12 @@ jobs:
 
       - name: Configure Radium Apps
         run: |
-          cd build/Radium-Apps
-          cmake ../../src/Radium-Apps -GNinja -DCMAKE_CXX_COMPILER=${{ matrix.config.cxx }} -DCMAKE_C_COMPILER=${{ matrix.config.cc }} -DCMAKE_BUILD_TYPE=Release -DCMAKE_INSTALL_PREFIX=../../install/ -DRadium_DIR=../../install/lib/cmake/Radium
-
+          cmake -S "${{ env.src_prefix }}/Radium-Apps" -B "${{ env.build_prefix }}/Radium-Apps" -GNinja \
+          -DCMAKE_CXX_COMPILER=${{ matrix.config.cxx }} -DCMAKE_C_COMPILER=${{ matrix.config.cc }} \
+          -DCMAKE_BUILD_TYPE=${{ matrix.build-type }} \
+          -DCMAKE_INSTALL_PREFIX=${{ env.install_prefix }}/Radium-Apps \
+          -DRadium_DIR="${{ github.workspace }}/${{ steps.paths.outputs.radium_install_dir }}/lib/cmake/Radium"
+                    
       - name: Build Radium Apps
         run: |
-          cd build/Radium-Apps
-          cmake --build . --parallel --config Release --target install
+          cmake --build  "${{ env.build_prefix }}/Radium-Apps" --parallel --config ${{ matrix.build-type }} --target install

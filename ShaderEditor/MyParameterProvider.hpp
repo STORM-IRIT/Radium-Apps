@@ -2,8 +2,7 @@
 
 #include <Engine/Data/RenderParameters.hpp>
 
-
-using ShaderConfigType = std::vector<std::pair<Ra::Engine::Data::ShaderType, std::string>> ;
+using ShaderConfigType = std::vector<std::pair<Ra::Engine::Data::ShaderType, std::string>>;
 
 class MyParameterProvider : public Ra::Engine::Data::ShaderParameterProvider
 {
@@ -24,6 +23,6 @@ class MyParameterProvider : public Ra::Engine::Data::ShaderParameterProvider
     }
 
   private:
-    Ra::Core::Utils::Color m_colorParameter {Ra::Core::Utils::Color::Green()};
-    Scalar m_scalarParameter {1};
+    Ra::Core::Utils::Color m_colorParameter { Ra::Core::Utils::Color::Green() };
+    Scalar m_scalarParameter { 1 };
 };

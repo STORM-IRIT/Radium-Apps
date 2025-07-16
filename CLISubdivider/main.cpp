@@ -9,15 +9,15 @@
 /// Macro used for testing only, to add attibutes to the TopologicalMesh
 /// before subdivisition
 /// \FIXME Must be removed once using Radium::IO with attribute loading.
-//#define TEST_ATTRIBUTES_SUBDIV
+// #define TEST_ATTRIBUTES_SUBDIV
 
 struct args {
     bool valid;
     int iteration;
     std::string outputFilename;
     std::string inputFilename;
-    std::unique_ptr<
-        OpenMesh::Subdivider::Uniform::SubdividerT<Ra::Core::Geometry::deprecated::TopologicalMesh, Scalar>>
+    std::unique_ptr<OpenMesh::Subdivider::Uniform::
+                        SubdividerT<Ra::Core::Geometry::deprecated::TopologicalMesh, Scalar>>
         subdivider;
 };
 
@@ -41,42 +41,34 @@ void printHelp( char* argv[] ) {
 
 args processArgs( int argc, char* argv[] ) {
     args ret;
-    bool outputFilenameSet{false};
-    bool subdividerSet{false};
+    bool outputFilenameSet { false };
+    bool subdividerSet { false };
     ret.iteration = 1;
 
-    for ( int i = 1; i < argc; i += 2 )
-    {
-        if ( std::string( argv[i] ) == std::string( "-i" ) )
-        {
+    for ( int i = 1; i < argc; i += 2 ) {
+        if ( std::string( argv[i] ) == std::string( "-i" ) ) {
             if ( i + 1 < argc ) { ret.inputFilename = argv[i + 1]; }
         }
-        else if ( std::string( argv[i] ) == std::string( "-o" ) )
-        {
-            if ( i + 1 < argc )
-            {
+        else if ( std::string( argv[i] ) == std::string( "-o" ) ) {
+            if ( i + 1 < argc ) {
                 ret.outputFilename = argv[i + 1];
                 outputFilenameSet  = true;
             }
         }
-        else if ( std::string( argv[i] ) == std::string( "-s" ) )
-        {
-            if ( i + 1 < argc )
-            {
-                std::string a{argv[i + 1]};
+        else if ( std::string( argv[i] ) == std::string( "-s" ) ) {
+            if ( i + 1 < argc ) {
+                std::string a { argv[i + 1] };
                 subdividerSet = true;
-                if ( a == std::string( "catmull" ) )
-                {
+                if ( a == std::string( "catmull" ) ) {
                     ret.subdivider = std::make_unique<Ra::Core::Geometry::CatmullClarkSubdivider>();
                 }
-                else if ( a == std::string( "loop" ) )
-                { ret.subdivider = std::make_unique<Ra::Core::Geometry::LoopSubdivider>(); }
-                else
-                { subdividerSet = false; }
+                else if ( a == std::string( "loop" ) ) {
+                    ret.subdivider = std::make_unique<Ra::Core::Geometry::LoopSubdivider>();
+                }
+                else { subdividerSet = false; }
             }
         }
-        else if ( std::string( argv[i] ) == std::string( "-n" ) )
-        {
+        else if ( std::string( argv[i] ) == std::string( "-n" ) ) {
             if ( i + 1 < argc ) { ret.iteration = std::stoi( std::string( argv[i + 1] ) ); }
         }
     }
@@ -88,14 +80,13 @@ int main( int argc, char* argv[] ) {
     using namespace Ra::Core::Utils; // log
     args a = processArgs( argc, argv );
     if ( !a.valid ) { printHelp( argv ); }
-    else
-    {
+    else {
         Ra::Core::Geometry::TriangleMesh mesh;
         Ra::IO::OBJFileManager obj;
 
         // Load geometry as triangle
         if ( a.inputFilename.empty() ) { mesh = Ra::Core::Geometry::makeBox(); }
-        else                           { obj.load( a.inputFilename, mesh ); }
+        else { obj.load( a.inputFilename, mesh ); }
 
         // Create topological structure
         Ra::Core::Geometry::deprecated::TopologicalMesh topologicalMesh( mesh );

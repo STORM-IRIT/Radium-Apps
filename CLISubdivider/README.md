@@ -1,8 +1,9 @@
 # Radium Subdivider Command-Line Interface
 
-Load a triangle mesh and subdivide it using OpenMesh. 
+Load a triangle mesh and subdivide it using OpenMesh.
 
 ## CLI parameters
+
 ```cpp
 std::cout << "Usage :\n"
           << argv[0] << " -i input.obj -o output -s type -n iteration  \n\n"
@@ -14,43 +15,47 @@ std::cout << "Usage :\n"
             "iteration of subdivision\n\n";
 ```
 
-
 ## Code breakdown
+
 Excluding command parsing, only very few steps are required to load, simplify and save the object:
 
- 1. Load triangular mesh or generate 
-```cpp
-Ra::Core::Geometry::TriangleMesh mesh;
-Ra::IO::OBJFileManager obj;
+1. Load triangular mesh or generate
 
-// Load geometry as triangle
-if ( inputFilename.empty() ) { mesh = Ra::Core::Geometry::makeBox(); }
-else                         { obj.load( inputFilename, mesh ); }
-```
+    ```cpp
+    Ra::Core::Geometry::TriangleMesh mesh;
+    Ra::IO::OBJFileManager obj;
 
- 2. Create topological structure from the loaded geometry, and OpenMesh datastructures.
-```cpp
-// Create topological structure
-Ra::Core::Geometry::TopologicalMesh topologicalMesh( mesh );
+    // Load geometry as triangle
+    if ( inputFilename.empty() ) { mesh = Ra::Core::Geometry::makeBox(); }
+    else                         { obj.load( inputFilename, mesh ); }
+    ```
 
-// Create CatmullClarkSubdivider
-using Subdivider = 
-OpenMesh::Subdivider::Uniform::SubdividerT<Ra::Core::Geometry::TopologicalMesh, Scalar>; 
-Subdiviser subdiviser(Ra::Core::Geometry::CatmullClarkSubdivider);
-```
+2. Create topological structure from the loaded geometry, and OpenMesh datastructures.
 
- 3. Create OpenMesh subdivider and process geometry
-```cpp
-subdivider.attach( topologicalMesh );
-subdivider( nIter );
-subdivider.detach();
-```
+    ```cpp
+    // Create topological structure
+    Ra::Core::Geometry::TopologicalMesh topologicalMesh( mesh );
 
- 4. Convert and save simplified geometry 
-```cpp
-// Convert processed topological structure to triangle mesh
-mesh = topologicalMesh.toTriangleMesh();
+    // Create CatmullClarkSubdivider
+    using Subdivider =
+    OpenMesh::Subdivider::Uniform::SubdividerT<Ra::Core::Geometry::TopologicalMesh, Scalar>;
+    Subdiviser subdiviser(Ra::Core::Geometry::CatmullClarkSubdivider);
+    ```
 
-// Save triangle mesh to obj file
-obj.save( outputFilename, mesh );
-```
+3. Create OpenMesh subdivider and process geometry
+
+    ```cpp
+    subdivider.attach( topologicalMesh );
+    subdivider( nIter );
+    subdivider.detach();
+    ```
+
+4. Convert and save simplified geometry
+
+    ```cpp
+    // Convert processed topological structure to triangle mesh
+    mesh = topologicalMesh.toTriangleMesh();
+
+    // Save triangle mesh to obj file
+    obj.save( outputFilename, mesh );
+    ```

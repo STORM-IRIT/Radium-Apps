@@ -63,6 +63,7 @@ jobs:
           mkdir -p "${{ steps.paths.outputs.external_install_dir }}"
 
       - name: Clone Radium
+        id: sha
         run: |
           git clone --recurse-submodules https://github.com/STORM-IRIT/Radium-Engine.git --single-branch ${{ env.src_prefix }}/Radium-Engine
           radium_sha=`git -C ${{ env.src_prefix }}/Radium-Engine rev-parse --short HEAD`

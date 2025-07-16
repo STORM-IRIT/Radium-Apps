@@ -1,45 +1,52 @@
 # Radium Applications
+
 Radium is a research 3D Engine for rendering, animation and processing.
 It is developed and maintained by the [STORM research group](https://www.irit.fr/STORM/site/).
 
 This repository holds front-end applications (GUI, command line) based on Radium Libraries
- - Sandbox: Graphical frontend of the Radium Engine. This application aims at demonstrating the capabilities of the Radium Libraries. It can be extended using Radium plugins.
- - CLISubdivider: Example of command line application. Loads obj files and run subdivision algorithms implemented with OpenMesh.
- 
+
+- Sandbox: Graphical frontend of the Radium Engine. This application aims at demonstrating the capabilities of the Radium Libraries. It can be extended using Radium plugins.
+- CLISubdivider: Example of command line application. Loads obj files and run subdivision algorithms implemented with OpenMesh.
+
 To get more details about each application, checkout the Readme files in each application directory.
 
-# How to get these applications
-## Pre-compiled binaries
-Pre-compiled binaries can be downloaded from https://github.com/STORM-IRIT/Radium-Releases/releases/.
+## How to get these applications
+
+### Pre-compiled binaries
+
+Pre-compiled binaries can be downloaded from <https://github.com/STORM-IRIT/Radium-Releases/releases/>.
 
 The downloaded archive contains:
- - Radium libraries
- - Radium example applications (this repository)
 
-## Compilation instructions
+- Radium libraries
+- Radium example applications (this repository)
+
+### Compilation instructions
+
 To compile this repository, you first need to compile and install the [Radium libraries](https://github.com/STORM-IRIT/Radium-Engine).
-Then, configure this project using cmake. 
-You need to tell cmake where to find the installed Radium package by setting the `Radium_DIR` variable to the right location (see more details in Radium Engine documentation: https://storm-irit.github.io/Radium-Engine/).
+Then, configure this project using cmake.
+You need to tell cmake where to find the installed Radium package by setting the `Radium_DIR` variable to the right location (see more details in Radium Engine documentation: <https://storm-irit.github.io/Radium-Engine/>).
 
+## How to write your own application
 
-# How to write your own application
 This repository also demonstrate how to write applications and extend Radium ecosystem.
 Radium provides a set of tools simplifying the deployment of such applications,
 which among other things take care of the portability and relocatability of the
 binaries.
 
-Other minimal application examples are available at https://github.com/STORM-IRIT/Radium-Engine/tree/master/tests/ExampleApps.
+Other minimal application examples are available at <https://github.com/STORM-IRIT/Radium-Engine/tree/master/tests/ExampleApps>.
 
 In order to write your own application, you need to follow theses instructions.
 
+### Setting a CMakeLists.txt to compile and install an application
 
-## Setting a CMakeLists.txt to compile and install an application
 To compile and execute an application, either in the build tree
 or after installation, the Radium environment must be configured,
 compiled and installed beforehand.
 
 The main CMakeLists.txt file for compiling a Radium Based application
 could be as simple as
+
 ```cmake
 # set the minimal cmake version supported by Radium cmake system
 cmake_minimum_required(VERSION 3.6)
@@ -82,18 +89,22 @@ configure_radium_app(
 )
 ```
 
-### Configure the application
+#### Configure the application
+
 Radium does not support in-source builds (it is bad practice anyway).
 You then must first create a buid directory that will be the root of the buildtree.
 
-    mkdir build
-    cd build
+```bash
+mkdir build
+cd build
+```
 
 If the Radium environment was installed in the directory `pathToRadiumInstallation`,
 configure the project with :
 
-    cmake ../ -DRadium_DIR=pathToRadiumInstallation/lib/cmake/Radium
-
+```bash
+cmake ../ -DRadium_DIR=pathToRadiumInstallation/lib/cmake/Radium
+```
 
 By default, the application will be installed in a directory
 called `installed-<Compiler_id>` in the application buildtree. This installed

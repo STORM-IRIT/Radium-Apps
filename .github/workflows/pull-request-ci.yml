@@ -92,8 +92,8 @@ jobs:
            -G Ninja --cxx ${{ matrix.config.cxx }} --cc ${{ matrix.config.cc }} \
            -c ${{ matrix.build-type }} --enable-testing OFF \
            --install-external "${{ steps.paths.outputs.external_install_dir }}" \
-           --install-radium "${{ steps.paths.outputs.radium_install_dir }}" 
-          
+           --install-radium "${{ steps.paths.outputs.radium_install_dir }}"
+
       - name: Clone Radium Apps
         uses: actions/checkout@master
         with:
@@ -106,7 +106,7 @@ jobs:
           -DCMAKE_BUILD_TYPE=${{ matrix.build-type }} \
           -DCMAKE_INSTALL_PREFIX=${{ env.install_prefix }}/Radium-Apps \
           -DRadium_DIR="${{ github.workspace }}/${{ steps.paths.outputs.radium_install_dir }}/lib/cmake/Radium"
-                    
+
       - name: Build Radium Apps
         run: |
           cmake --build  "${{ env.build_prefix }}/Radium-Apps" --parallel --config ${{ matrix.build-type }} --target install

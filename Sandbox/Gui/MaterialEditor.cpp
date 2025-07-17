@@ -17,7 +17,7 @@ MaterialEditor::MaterialEditor( QWidget* parent ) :
     m_matParamsEditor = new Ra::Gui::MaterialParameterEditor( this );
     connect( m_matParamsEditor,
              &Ra::Gui::MaterialParameterEditor::materialParametersModified,
-             [this](const std::string&) { emit materialChanged(); } );
+             [this]( const std::string& ) { emit materialChanged(); } );
     layout->addWidget( m_matParamsEditor );
 }
 

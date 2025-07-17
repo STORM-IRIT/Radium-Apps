@@ -4,9 +4,9 @@
 
 // include the Engine/entity/component interface
 #include <Core/Geometry/MeshPrimitives.hpp>
-#include <Engine/Scene/GeometryComponent.hpp>
-#include <Engine/Scene/EntityManager.hpp>
 #include <Engine/Rendering/RenderObjectManager.hpp>
+#include <Engine/Scene/EntityManager.hpp>
+#include <Engine/Scene/GeometryComponent.hpp>
 #include <Engine/Scene/GeometrySystem.hpp>
 
 // include the custom material definition
@@ -16,29 +16,29 @@
 #include <Gui/Viewer/Viewer.hpp>
 
 #include "CameraManipulator.hpp"
-#include "ShaderEditorWidget.hpp"
 #include "MyParameterProvider.hpp"
+#include "ShaderEditorWidget.hpp"
 
 #include <string>
 
 // Qt
-#include <QTimer>
 #include <QDockWidget>
+#include <QTimer>
 
 /**
  * Demonstrate the usage of RawShaderMaterial functionalities
  */
 // Vertex shader source code
-const std::string _vertexShaderSource {"#include \"TransformStructs.glsl\"\n"
-                                       "layout (location = 0) in vec3 in_position;\n"
-                                       "layout (location = 0) out vec3 out_pos;\n"
-                                       "uniform Transform transform;\n"
-                                       "void main(void)\n"
-                                       "{\n"
-                                       "    mat4 mvp    = transform.proj * transform.view;\n"
-                                       "    out_pos     = in_position;\n"
-                                       "    gl_Position = mvp*vec4(in_position.xyz, 1.0);\n"
-                                       "}\n"};
+const std::string _vertexShaderSource { "#include \"TransformStructs.glsl\"\n"
+                                        "layout (location = 0) in vec3 in_position;\n"
+                                        "layout (location = 0) out vec3 out_pos;\n"
+                                        "uniform Transform transform;\n"
+                                        "void main(void)\n"
+                                        "{\n"
+                                        "    mat4 mvp    = transform.proj * transform.view;\n"
+                                        "    out_pos     = in_position;\n"
+                                        "    gl_Position = mvp*vec4(in_position.xyz, 1.0);\n"
+                                        "}\n" };
 // Fragment shader source code
 const std::string _fragmentShaderSource {
     "layout (location = 0) in  vec3 in_pos;\n"
@@ -48,16 +48,13 @@ const std::string _fragmentShaderSource {
     "void main(void)\n"
     "{\n"
     "    out_color =  ( 1 + cos( 20 * ( in_pos.x + aScalarUniform ) ) ) * 0.5 * aColorUniform;\n"
-    "}\n"};
-
-
+    "}\n" };
 
 const ShaderConfigType defaultConfig {
-    {Ra::Engine::Data::ShaderType::ShaderType_VERTEX, _vertexShaderSource},
-    {Ra::Engine::Data::ShaderType::ShaderType_FRAGMENT, _fragmentShaderSource}};
+    { Ra::Engine::Data::ShaderType::ShaderType_VERTEX, _vertexShaderSource },
+    { Ra::Engine::Data::ShaderType::ShaderType_FRAGMENT, _fragmentShaderSource } };
 
 auto paramProvider = std::make_shared<MyParameterProvider>();
-
 
 /**
  * Generate a quad with a ShaderMaterial attached
@@ -66,7 +63,7 @@ auto paramProvider = std::make_shared<MyParameterProvider>();
  */
 std::shared_ptr<Ra::Engine::Rendering::RenderObject> initQuad( Ra::Gui::BaseApplication& app ) {
     //! [Creating the quad]
-    auto quad = Ra::Core::Geometry::makeZNormalQuad( {1_ra, 1_ra} );
+    auto quad = Ra::Core::Geometry::makeZNormalQuad( { 1_ra, 1_ra } );
 
     //! [Create the engine entity for the quad]
     auto e = app.m_engine->getEntityManager()->createEntity( "Quad Entity" );
@@ -75,10 +72,11 @@ std::shared_ptr<Ra::Engine::Rendering::RenderObject> initQuad( Ra::Gui::BaseAppl
     paramProvider->setOrComputeTheParameterValues();
 
     //! [Create the shader material]
-    Ra::Core::Asset::RawShaderMaterialData mat {"Quad Material", defaultConfig, paramProvider};
+    Ra::Core::Asset::RawShaderMaterialData mat { "Quad Material", defaultConfig, paramProvider };
 
     //! [Create a geometry component using the custom material]
-    auto c = new Ra::Engine::Scene::TriangleMeshComponent( "Quad Mesh", e, std::move( quad ), &mat );
+    auto c =
+        new Ra::Engine::Scene::TriangleMeshComponent( "Quad Mesh", e, std::move( quad ), &mat );
 
     //! [Register the entity/component association to the geometry system ]
     auto system = app.m_engine->getSystem( "GeometrySystem" );
@@ -103,12 +101,16 @@ int main( int argc, char* argv[] ) {
     auto ro = initQuad( app );
 
     auto viewer = app.m_mainWindow->getViewer();
-    viewer->setCameraManipulator(
-        new CameraManipulator2D( *( viewer->getCameraManipulator() ) ) );
+    viewer->setCameraManipulator( new CameraManipulator2D( *( viewer->getCameraManipulator() ) ) );
 
-    QDockWidget* dock = new QDockWidget("Shaders editor");
-    dock->setWidget( new ShaderEditorWidget(defaultConfig[0].second, defaultConfig[1].second, ro, viewer->getRenderer(), paramProvider, dock) );
-    app.m_mainWindow->addDockWidget(Qt::LeftDockWidgetArea, dock);
+    QDockWidget* dock = new QDockWidget( "Shaders editor" );
+    dock->setWidget( new ShaderEditorWidget( defaultConfig[0].second,
+                                             defaultConfig[1].second,
+                                             ro,
+                                             viewer->getRenderer(),
+                                             paramProvider,
+                                             dock ) );
+    app.m_mainWindow->addDockWidget( Qt::LeftDockWidgetArea, dock );
 
     return app.exec();
 }

@@ -1,4 +1,4 @@
-cmake_minimum_required (VERSION 3.18)
+cmake_minimum_required(VERSION 3.18)
 project(Radium-apps)
 
 # Set default build type to Release
@@ -7,23 +7,27 @@ if(NOT CMAKE_BUILD_TYPE)
   set(CMAKE_BUILD_TYPE "Release")
 endif()
 
-# set the installation directory for all the apps at once. This will make the same definition ignore on all the
-# included applications
-if (CMAKE_INSTALL_PREFIX_INITIALIZED_TO_DEFAULT)
+# set the installation directory for all the apps at once. This will make the
+# same definition ignore on all the included applications
+if(CMAKE_INSTALL_PREFIX_INITIALIZED_TO_DEFAULT)
 
-    # Compute default paths following Radium's logic
-    if (CMAKE_BUILD_TYPE STREQUAL "Release")
-        set(RADIUM_APPS_BUNDLE_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/installed-${CMAKE_CXX_COMPILER_ID})
-    else ()
-        set(RADIUM_APPS_BUNDLE_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/installed-${CMAKE_CXX_COMPILER_ID}-${CMAKE_BUILD_TYPE})
-    endif ()
+  # Compute default paths following Radium's logic
+  if(CMAKE_BUILD_TYPE STREQUAL "Release")
+    set(RADIUM_APPS_BUNDLE_DIRECTORY
+        ${CMAKE_CURRENT_BINARY_DIR}/installed-${CMAKE_CXX_COMPILER_ID})
+  else()
+    set(RADIUM_APPS_BUNDLE_DIRECTORY
+        ${CMAKE_CURRENT_BINARY_DIR}/installed-${CMAKE_CXX_COMPILER_ID}-${CMAKE_BUILD_TYPE}
+    )
+  endif()
 
-    set (CMAKE_INSTALL_PREFIX "${RADIUM_APPS_BUNDLE_DIRECTORY}/" CACHE PATH
-            "Install path prefix, prepended onto install directories." FORCE )
-    message( "Set install prefix to ${CMAKE_INSTALL_PREFIX}" )
-    set(CMAKE_INSTALL_PREFIX_INITIALIZED_TO_DEFAULT False)
+  set(CMAKE_INSTALL_PREFIX
+      "${RADIUM_APPS_BUNDLE_DIRECTORY}/"
+      CACHE PATH "Install path prefix, prepended onto install directories."
+            FORCE)
+  message("Set install prefix to ${CMAKE_INSTALL_PREFIX}")
+  set(CMAKE_INSTALL_PREFIX_INITIALIZED_TO_DEFAULT False)
 endif()
-
 
 # Be nice to visual studio
 set_property(GLOBAL PROPERTY USE_FOLDERS ON)
